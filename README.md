@@ -1,7 +1,5 @@
 <div align="center">
 
-<img src="https://raw.githubusercontent.com/user-attachments/assets/a313a372-c576-496a-91e8-531ef50f600c/polaris_logo_placeholder.png" alt="Polaris Logo" width="200"/>
-
 # Polaris
 
 ### A Production-Inspired NLP Engineering Platform
