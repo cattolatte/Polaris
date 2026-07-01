@@ -82,11 +82,13 @@ target-version = "py312"
 
 [tool.ruff.lint]
 select = [
-    "E",
-    "F",
-    "I",
-    "UP",
-    "B",
+    "E",    # pycodestyle
+    "F",    # Pyflakes
+    "I",    # isort
+    "UP",   # pyupgrade
+    "B",    # bugbear
+    "SIM",  # simplify
+    "C4",   # comprehensions
 ]
 
 ignore = []
@@ -113,7 +115,10 @@ no_implicit_optional = true
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
-addopts = "-ra"
+addopts = [
+    "-ra",
+    "--strict-markers",
+]
 
 # ============================================================
 # Coverage
@@ -125,3 +130,11 @@ source = ["polaris"]
 [tool.coverage.report]
 show_missing = true
 skip_covered = false
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/polaris",
+    "/tests",
+    "/README.md",
+    "/LICENSE",
+]
