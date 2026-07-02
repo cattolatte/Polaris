@@ -1,12 +1,8 @@
-# data
+# Data Module
 
-## Purpose
+The data module is responsible for representing, loading, and managing
+datasets used throughout Polaris.
 
-This module is part of the Polaris framework.
+This package defines the core abstractions for text samples and datasets.
 
-Current Status:
-- Planned
-- Not implemented
-
-Implementation for this module will begin during its corresponding development phase.
-
+Concrete dataset implementations live under `datasets/`.
