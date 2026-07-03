@@ -80,12 +80,14 @@ logs/
 # ============================================================
 # ML Artifacts
 # ============================================================
+# Root-anchored so these only match top-level artifact directories and never
+# nested source packages such as polaris/data/datasets/.
 
-datasets/
-artifacts/
-checkpoints/
-runs/
-mlruns/
+/datasets/
+/artifacts/
+/checkpoints/
+/runs/
+/mlruns/
 
 *.pth
 *.pt
