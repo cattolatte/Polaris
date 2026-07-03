@@ -38,7 +38,7 @@ The goal is to build software that is understandable and maintainable over the l
 
 ## Reporting Issues
 
-If you discover a bug, have an architectural concern, or find an issue in the documentation, please [**open an issue**](https://github.com/morax-app/polaris/issues) on GitHub.
+If you discover a bug, have an architectural concern, or find an issue in the documentation, please [**open an issue**](https://github.com/cattolatte/Polaris/issues) on GitHub.
 
 Please provide a clear and concise description, including:
 

@@ -2,6 +2,28 @@
 
 > "A strong framework begins with a strong foundation."
 
+**Status:** ✅ Completed (as re-scoped)
+
+---
+
+## Scope Revision
+
+This document was written before the roadmap adopted its
+**"infrastructure when needed"** rule. The original plan listed configuration,
+logging, and the CLI as Phase 01 deliverables. Those were subsequently
+**deliberately deferred** so that infrastructure is built only when a real
+component requires it (see `ROADMAP.md`):
+
+- **Configuration** → introduced with Experiment Tracking (v0.6)
+- **Logging** → introduced with the Training Engine (v0.5)
+- **CLI** → introduced with Deployment (v0.9)
+- **Utilities** → added incrementally, only when a real component needs them
+
+What v0.1.0 actually shipped: the `core` package (protocols + shared types),
+the `PolarisError` exception hierarchy, the `Registry`, strict tooling, and CI.
+The sections below have been updated to reflect this; the deferred items are
+called out rather than removed so the original intent stays visible.
+
 ---
 
 # Overview
@@ -22,13 +44,14 @@ The primary objectives of Phase 01 are:
 
 - Establish the core architecture.
 - Build reusable framework abstractions.
-- Introduce configuration management.
 - Implement a plugin-style registry system.
-- Create a consistent logging system.
-- Build the command-line interface.
 - Define exception hierarchy.
 - Establish testing infrastructure.
 - Configure development tooling.
+
+> Configuration management, logging, and the CLI were part of the original
+> objectives but were **deferred** to later phases — see the Scope Revision
+> note above.
 
 ---
 
@@ -38,12 +61,13 @@ Phase 01 is considered complete when:
 
 - Core package is implemented.
 - Registry system is operational.
-- Configuration loading works.
-- CLI launches successfully.
-- Logging is standardized.
+- Exception hierarchy is defined.
 - Unit tests pass.
 - Codebase passes linting and type checking.
 - Documentation is updated.
+
+Configuration, CLI, and logging were removed from the completion criteria when
+they were deferred to later phases (see the Scope Revision note above).
 
 Only after these requirements are met will Polaris reach **v0.1.0-alpha**.
 
@@ -169,35 +193,16 @@ Registry
 Registry()
 
 register()
-
-register_model()
-
-register_dataset()
-
-register_tokenizer()
-
-register_metric()
-
 get()
-
+contains()
+remove()
+clear()
 list()
 ```
 
-Configuration
-
-```python
-load_config()
-
-save_config()
-
-validate_config()
-```
-
-Logging
-
-```python
-get_logger()
-```
+Typed helpers such as `register_model()` / `register_dataset()` appeared in the
+original sketch but were **not** built. Per the "concrete before abstract" rule
+they will be added only when a real caller needs them.
 
 Version
 
@@ -205,15 +210,8 @@ Version
 __version__
 ```
 
-CLI
-
-```
-polaris
-
-polaris info
-
-polaris version
-```
+Configuration, Logging, and CLI APIs (`load_config()`, `get_logger()`,
+`polaris ...`) are **deferred** to later phases — see the Scope Revision note.
 
 ---
 
@@ -395,15 +393,16 @@ Readability is preferred over clever implementations.
 
 # Deliverables
 
-- [ ] Core infrastructure
-- [ ] Registry system
-- [ ] Configuration system
-- [ ] Logging
-- [ ] CLI
-- [ ] Utilities
-- [ ] Tests
-- [ ] Documentation
-- [ ] CI configuration
+- [x] Core infrastructure
+- [x] Registry system
+- [x] Exception hierarchy
+- [x] Tests
+- [x] Documentation
+- [x] CI configuration
+- [ ] Configuration system — deferred to v0.6
+- [ ] Logging — deferred to v0.5
+- [ ] CLI — deferred to v0.9
+- [ ] Utilities — added incrementally when a real component needs them
 
 ---
 

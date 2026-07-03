@@ -1,6 +1,6 @@
 # Phase 03 — Tokenization
 
-**Status:** 🟡 Planned
+**Status:** 🚧 In Progress
 
 ---
 
@@ -61,7 +61,7 @@ polaris/
 │
 ├── tokenizers/
 │   ├── __init__.py
-│   ├── base.py
+│   ├── tokenizer.py
 │   ├── encoding.py
 │   ├── vocabulary.py
 │   └── whitespace.py
@@ -69,7 +69,7 @@ polaris/
 tests/
 └── unit/
     └── tokenizers/
-        ├── test_base.py
+        ├── test_tokenizer.py
         ├── test_encoding.py
         ├── test_vocabulary.py
         └── test_whitespace.py
@@ -84,7 +84,7 @@ tests/
 File
 
 ```
-polaris/tokenizers/base.py
+polaris/tokenizers/tokenizer.py
 ```
 
 Purpose
@@ -197,9 +197,10 @@ dependency-free implementation.
 # Public API
 
 ```python
-from polaris.tokenizers import WhitespaceTokenizer
+from polaris.tokenizers import Vocabulary, WhitespaceTokenizer
 
-tokenizer = WhitespaceTokenizer()
+vocabulary = Vocabulary({"Hello": 0, "world!": 1})
+tokenizer = WhitespaceTokenizer(vocabulary=vocabulary)
 
 encoding = tokenizer.encode("Hello world!")
 

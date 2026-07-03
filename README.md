@@ -6,8 +6,8 @@
 
 *Build. Train. Evaluate. Deploy.*
 
-[![Status](https://img.shields.io/badge/status-under%20development-orange)](https://github.com/morax-app/polaris)
-[![Version](https://img.shields.io/badge/version-v0.0.1--alpha-blue)](CHANGELOG.md)
+[![Status](https://img.shields.io/badge/status-under%20development-orange)](https://github.com/cattolatte/Polaris)
+[![Version](https://img.shields.io/badge/version-v0.3.0--dev-blue)](CHANGELOG.md)
 [![Python](https://img.shields.io/badge/python-3.12+-blue)](https://www.python.org)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
@@ -60,14 +60,15 @@ The platform is organized into dedicated modules with clearly defined responsibi
 
 | Module | Description | Status |
 | :--- | :--- | :--- |
-| `core/` | Provides the foundational building blocks, interfaces, and architectural patterns for the entire platform. | 🏗️ Planned |
-| `registry/` | A centralized mechanism for registering and accessing components (models, datasets, etc.) by name. | 🏗️ Planned |
-| `data/` | Handles data loading, preprocessing, and management, creating a robust dataset engine. | 🏗️ Planned |
-| `tokenizers/` | A laboratory for building, training, and using various tokenization strategies. | 🏗️ Planned |
+| `core/` | Provides the foundational building blocks, interfaces, and architectural patterns for the entire platform. | ✅ Implemented |
+| `registry/` | A centralized mechanism for registering and accessing components (models, datasets, etc.) by name. | ✅ Implemented |
+| `data/` | Handles data loading and management, exposing datasets through a Polaris-native interface. | ✅ Implemented |
+| `tokenizers/` | A laboratory for building and using various tokenization strategies. | 🚧 In Progress |
 | `models/` | Provides reusable abstractions and implementations of modern NLP architectures. | 🏗️ Planned |
-| `engine/` | The core training and evaluation engine, orchestrating the machine learning workflow. | 🏗️ Planned |
+| `training/` | The core training engine, orchestrating training loops, checkpointing, and optimization. | 🏗️ Planned |
 | `experiments/` | Manages experiment tracking, logging, and versioning of results. | 🏗️ Planned |
 | `evaluation/` | Provides tools and metrics for comprehensive model evaluation. | 🏗️ Planned |
+| `inference/` | Runtime for running predictions with trained models. | 🏗️ Planned |
 | `deployment/` | Contains utilities for packaging, optimizing, and deploying models for inference. | 🏗️ Planned |
 | `visualization/` | Tools for visualizing data, model architectures, and experiment results. | 🏗️ Planned |
 | `plugins/` | An extensible plugin system for integrating third-party tools and custom functionality. | 🏗️ Planned |
