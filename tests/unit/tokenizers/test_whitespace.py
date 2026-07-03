@@ -256,3 +256,27 @@ def test_tokenizer_vocabulary_is_exactly_supplied_object() -> None:
     tokenizer = WhitespaceTokenizer(vocabulary=vocabulary)
 
     assert tokenizer.vocabulary is vocabulary
+
+
+# ---------------------------------------------------------------------------
+# Unknown-token handling
+# ---------------------------------------------------------------------------
+
+
+def test_encode_maps_unknown_tokens_to_unk_id_when_configured() -> None:
+    vocabulary = Vocabulary(token_to_id={"<unk>": 0, "hello": 1}, unk_token="<unk>")
+    tokenizer = WhitespaceTokenizer(vocabulary=vocabulary)
+
+    encoding = tokenizer.encode("hello world")
+
+    assert encoding.ids == (1, 0)
+    assert encoding.tokens == ("hello", "world")
+
+
+def test_encode_with_unk_configured_never_raises_on_unknown() -> None:
+    vocabulary = Vocabulary(token_to_id={"<unk>": 0, "hello": 1}, unk_token="<unk>")
+    tokenizer = WhitespaceTokenizer(vocabulary=vocabulary)
+
+    encoding = tokenizer.encode("totally unseen words")
+
+    assert encoding.ids == (0, 0, 0)

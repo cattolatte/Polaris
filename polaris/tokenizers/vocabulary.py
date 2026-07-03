@@ -2,17 +2,20 @@
 
 Design Principles
 ------------------
-- ``Vocabulary`` is a pure value object: it represents a validated,
-  bidirectional mapping between tokens and ids, and nothing else.
-- It contains no tokenizer logic, no training logic, no serialization,
-  no frequency information, and no pruning.
+- ``Vocabulary`` is a value object: it represents a validated, bidirectional
+  mapping between tokens and ids, plus the identity of its special tokens
+  (unknown and padding), and nothing else.
+- It contains no *construction* logic: it does not count frequencies, prune,
+  or build itself from a corpus. That lives in
+  :func:`~polaris.tokenizers.vocabulary_builder.build_vocabulary`, keeping this
+  type a pure, deterministic value object.
 - Immutability is enforced the same way as :class:`~polaris.tokenizers.
   encoding.Encoding`: a frozen, slotted dataclass whose fields are
   stored as read-only ``MappingProxyType`` views, with equality and
   hashing derived by the dataclass machinery rather than hand-written.
-- The reverse mapping (``id`` to ``token``) is always derived
-  automatically from the constructor argument in ``__post_init__``; it
-  is never supplied or constructed manually by callers.
+- The reverse mapping (``id`` to ``token``) and the special-token ids are
+  always derived automatically in ``__post_init__``; they are never supplied
+  or constructed manually by callers.
 """
 
 from __future__ import annotations
@@ -29,8 +32,9 @@ class Vocabulary:
     """An immutable, validated mapping between tokens and integer ids.
 
     A ``Vocabulary`` wraps a token-to-id mapping, validates its
-    invariants once at construction time, and derives the reverse
-    id-to-token mapping automatically.
+    invariants once at construction time, derives the reverse
+    id-to-token mapping automatically, and optionally designates an
+    unknown-token and a padding-token.
 
     Parameters
     ----------
@@ -38,12 +42,22 @@ class Vocabulary:
         A mapping from token strings to integer ids. Tokens are unique
         by construction of the mapping itself; ids must additionally be
         unique, non-negative, and contiguous starting from ``0``.
+    unk_token : str, optional
+        The token used to represent out-of-vocabulary tokens. If given, it
+        must be a key of ``token_to_id`` and enables the fallback behaviour
+        of :meth:`get_id`.
+    pad_token : str, optional
+        The token used to pad sequences to equal length. If given, it must
+        be a key of ``token_to_id``. ``Vocabulary`` only records its
+        identity; padding itself is performed by the collation layer.
 
     Raises
     ------
     ValueError
-        If any token id is negative, if token ids are not unique, or
-        if the ids are not contiguous starting from ``0``.
+        If any token id is negative, if token ids are not unique, if the
+        ids are not contiguous starting from ``0``, if a supplied special
+        token is not present in ``token_to_id``, or if ``unk_token`` and
+        ``pad_token`` are equal.
 
     Examples
     --------
@@ -57,19 +71,33 @@ class Vocabulary:
     >>> vocabulary.lookup_id("world")
     1
     >>> vocabulary.lookup_token(0)
+    'hello'
+    >>> vocab = Vocabulary(
+    ...     {"<pad>": 0, "<unk>": 1, "hello": 2},
+    ...     unk_token="<unk>",
+    ...     pad_token="<pad>",
+    ... )
+    >>> vocab.get_id("unseen")
+    1
     """
 
     token_to_id: Mapping[str, int]
+    unk_token: str | None = None
+    pad_token: str | None = None
+
     id_to_token: Mapping[int, str] = field(init=False)
+    unk_id: int | None = field(init=False)
+    pad_id: int | None = field(init=False)
 
     def __post_init__(self) -> None:
-        """Validate invariants and derive the reverse mapping.
+        """Validate invariants and derive the reverse mapping and special ids.
 
         Raises
         ------
         ValueError
-            If any token id is negative, if token ids are not unique,
-            or if the ids are not contiguous starting from ``0``.
+            If any token id is negative, if token ids are not unique, if the
+            ids are not contiguous starting from ``0``, if a supplied special
+            token is absent, or if ``unk_token`` and ``pad_token`` are equal.
         """
         ids = list(self.token_to_id.values())
 
@@ -92,8 +120,34 @@ class Vocabulary:
             {token_id: token for token, token_id in resolved_token_to_id.items()}
         )
 
+        for role, token in (
+            ("unk_token", self.unk_token),
+            ("pad_token", self.pad_token),
+        ):
+            if token is not None and token not in resolved_token_to_id:
+                msg = f"{role} {token!r} is not present in the vocabulary"
+                raise ValueError(msg)
+
+        if (
+            self.unk_token is not None
+            and self.pad_token is not None
+            and self.unk_token == self.pad_token
+        ):
+            msg = "unk_token and pad_token must be different tokens"
+            raise ValueError(msg)
+
         object.__setattr__(self, "token_to_id", resolved_token_to_id)
         object.__setattr__(self, "id_to_token", resolved_id_to_token)
+        object.__setattr__(
+            self,
+            "unk_id",
+            None if self.unk_token is None else resolved_token_to_id[self.unk_token],
+        )
+        object.__setattr__(
+            self,
+            "pad_id",
+            None if self.pad_token is None else resolved_token_to_id[self.pad_token],
+        )
 
     @property
     def size(self) -> int:
@@ -106,8 +160,27 @@ class Vocabulary:
         """
         return len(self.token_to_id)
 
+    @property
+    def special_tokens(self) -> tuple[str, ...]:
+        """tuple[str, ...]: The configured special tokens, padding first.
+
+        Contains whichever of ``pad_token`` and ``unk_token`` are set, in
+        that order. Empty when neither is configured.
+
+        Examples
+        --------
+        >>> vocab = Vocabulary(
+        ...     {"<pad>": 0, "<unk>": 1}, unk_token="<unk>", pad_token="<pad>"
+        ... )
+        >>> vocab.special_tokens
+        ('<pad>', '<unk>')
+        """
+        return tuple(
+            token for token in (self.pad_token, self.unk_token) if token is not None
+        )
+
     def lookup_id(self, token: str) -> int:
-        """Look up the integer id assigned to a token.
+        """Look up the integer id assigned to a token, strictly.
 
         Parameters
         ----------
@@ -122,7 +195,8 @@ class Vocabulary:
         Raises
         ------
         KeyError
-            If ``token`` is not present in the vocabulary.
+            If ``token`` is not present in the vocabulary. Unlike
+            :meth:`get_id`, this never falls back to the unknown-token id.
 
         Examples
         --------
@@ -134,6 +208,41 @@ class Vocabulary:
         except KeyError:
             msg = f"unknown token: {token!r}"
             raise KeyError(msg) from None
+
+    def get_id(self, token: str) -> int:
+        """Resolve a token to an id, using the unknown-token fallback.
+
+        Parameters
+        ----------
+        token : str
+            The token to resolve.
+
+        Returns
+        -------
+        int
+            The id assigned to ``token``; or the ``unk_token`` id if ``token``
+            is absent and an ``unk_token`` is configured.
+
+        Raises
+        ------
+        KeyError
+            If ``token`` is absent and no ``unk_token`` is configured.
+
+        Examples
+        --------
+        >>> vocab = Vocabulary({"<unk>": 0, "hello": 1}, unk_token="<unk>")
+        >>> vocab.get_id("hello")
+        1
+        >>> vocab.get_id("missing")
+        0
+        """
+        token_id = self.token_to_id.get(token)
+        if token_id is not None:
+            return token_id
+        if self.unk_id is not None:
+            return self.unk_id
+        msg = f"unknown token: {token!r}"
+        raise KeyError(msg)
 
     def lookup_token(self, token_id: int) -> str:
         """Look up the token assigned to an integer id.

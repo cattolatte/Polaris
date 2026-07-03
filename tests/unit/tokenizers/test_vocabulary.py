@@ -257,3 +257,102 @@ def test_repr_contains_token_mapping() -> None:
 
     assert "hello" in repr(vocabulary)
     assert "world" in repr(vocabulary)
+
+
+# ---------------------------------------------------------------------------
+# Special tokens
+# ---------------------------------------------------------------------------
+
+
+def test_special_tokens_default_to_none() -> None:
+    """A vocabulary without special tokens exposes ``None`` ids and no specials."""
+    vocabulary = Vocabulary({"hello": 0})
+
+    assert vocabulary.unk_token is None
+    assert vocabulary.pad_token is None
+    assert vocabulary.unk_id is None
+    assert vocabulary.pad_id is None
+    assert vocabulary.special_tokens == ()
+
+
+def test_unk_and_pad_tokens_expose_their_ids() -> None:
+    """Configured special tokens expose their ids."""
+    vocabulary = Vocabulary(
+        {"<pad>": 0, "<unk>": 1, "hello": 2},
+        unk_token="<unk>",
+        pad_token="<pad>",
+    )
+
+    assert vocabulary.unk_token == "<unk>"
+    assert vocabulary.pad_token == "<pad>"
+    assert vocabulary.pad_id == 0
+    assert vocabulary.unk_id == 1
+
+
+def test_special_tokens_property_orders_pad_then_unk() -> None:
+    """The ``special_tokens`` property lists padding before unknown."""
+    vocabulary = Vocabulary(
+        {"<pad>": 0, "<unk>": 1}, unk_token="<unk>", pad_token="<pad>"
+    )
+
+    assert vocabulary.special_tokens == ("<pad>", "<unk>")
+
+
+def test_unk_token_absent_from_mapping_raises() -> None:
+    """An unk token missing from the mapping is rejected."""
+    with pytest.raises(ValueError, match="unk_token"):
+        Vocabulary({"hello": 0}, unk_token="<unk>")
+
+
+def test_pad_token_absent_from_mapping_raises() -> None:
+    """A pad token missing from the mapping is rejected."""
+    with pytest.raises(ValueError, match="pad_token"):
+        Vocabulary({"hello": 0}, pad_token="<pad>")
+
+
+def test_unk_and_pad_tokens_must_differ() -> None:
+    """The same token cannot be both unk and pad."""
+    with pytest.raises(ValueError, match="different"):
+        Vocabulary({"<x>": 0, "hello": 1}, unk_token="<x>", pad_token="<x>")
+
+
+def test_vocabularies_with_different_specials_compare_unequal() -> None:
+    """Special-token identity participates in equality."""
+    with_unk = Vocabulary({"<unk>": 0, "hi": 1}, unk_token="<unk>")
+    without_unk = Vocabulary({"<unk>": 0, "hi": 1})
+
+    assert with_unk != without_unk
+
+
+# ---------------------------------------------------------------------------
+# get_id
+# ---------------------------------------------------------------------------
+
+
+def test_get_id_returns_id_for_known_token() -> None:
+    """``get_id`` returns the id of a known token."""
+    vocabulary = Vocabulary({"<unk>": 0, "hello": 1}, unk_token="<unk>")
+
+    assert vocabulary.get_id("hello") == 1
+
+
+def test_get_id_falls_back_to_unk_for_unknown_token() -> None:
+    """``get_id`` returns the unk id for an unknown token when configured."""
+    vocabulary = Vocabulary({"<unk>": 0, "hello": 1}, unk_token="<unk>")
+
+    assert vocabulary.get_id("missing") == 0
+
+
+def test_get_id_resolves_token_with_id_zero() -> None:
+    """``get_id`` resolves a token whose id is ``0`` (guards a truthiness bug)."""
+    vocabulary = Vocabulary({"hello": 0, "world": 1}, unk_token="world")
+
+    assert vocabulary.get_id("hello") == 0
+
+
+def test_get_id_without_unk_raises_key_error() -> None:
+    """``get_id`` raises when the token is unknown and no unk is configured."""
+    vocabulary = Vocabulary({"hello": 0})
+
+    with pytest.raises(KeyError):
+        vocabulary.get_id("missing")

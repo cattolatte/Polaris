@@ -13,7 +13,9 @@ Work toward **v0.3.0 — Tokenization Foundations**. See `ROADMAP.md`.
 ### Added
 
 - Tokenization foundations: the `Tokenizer` protocol, `Vocabulary`, `Encoding`, and the `WhitespaceTokenizer` reference implementation.
-- Public API re-exports so components import from their package roots: `polaris.tokenizers` (`Tokenizer`, `Vocabulary`, `Encoding`, `WhitespaceTokenizer`), `polaris.data` (`Dataset`, `TextSample`), and `polaris.data.datasets` (`IMDBDataset`).
+- Special tokens on `Vocabulary`: optional `unk_token` and `pad_token` (with derived `unk_id` / `pad_id` and a `special_tokens` property), plus an unknown-aware `get_id`. `WhitespaceTokenizer.encode` now maps out-of-vocabulary tokens to the unk id when one is configured, and still raises otherwise.
+- `build_vocabulary` (`polaris.tokenizers`), which builds a `Vocabulary` from a tokenized corpus with frequency ordering, deterministic tie-breaking, `min_frequency`, `max_size`, and reserved special tokens — the prerequisites for training on a real dataset.
+- Public API re-exports so components import from their package roots: `polaris.tokenizers` (`Tokenizer`, `Vocabulary`, `Encoding`, `WhitespaceTokenizer`, `build_vocabulary`), `polaris.data` (`Dataset`, `TextSample`), and `polaris.data.datasets` (`IMDBDataset`).
 - Architecture Decision Records under `docs/adr/`, capturing the project identity, vertical-slice architecture, the PyTorch tensor-framework decision (with model internals from scratch), the evidence-driven abstraction policy, and the dormant-Registry decision.
 
 ### Changed

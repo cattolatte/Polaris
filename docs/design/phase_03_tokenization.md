@@ -4,6 +4,25 @@
 
 ---
 
+## Completion note (v0.3.x)
+
+The four core components below (Tokenizer protocol, Vocabulary, Encoding,
+Whitespace tokenizer) are implemented. Before moving to Phase 4, two capabilities
+required by a real training pipeline were added to close out tokenization:
+
+- **Special tokens** — `Vocabulary` optionally designates an `unk_token` and
+  `pad_token` (exposing `unk_id` / `pad_id`), and `get_id` resolves unknown
+  tokens to the unk id. This fulfils the "unknown token handling / special
+  tokens" responsibilities listed under Vocabulary below.
+- **Vocabulary building** — `build_vocabulary` (in `vocabulary_builder.py`)
+  builds a vocabulary from a tokenized corpus (frequency ordering, `min_frequency`,
+  `max_size`, reserved special tokens), kept out of the `Vocabulary` value object.
+
+The remaining tokenizer algorithms (Character, BPE, WordPiece, …) stay deferred
+as incremental v0.3.x slices and are **not** required for Phase 4.
+
+---
+
 # Overview
 
 Phase 3 introduces the first text processing subsystem in Polaris.
@@ -64,6 +83,7 @@ polaris/
 │   ├── tokenizer.py
 │   ├── encoding.py
 │   ├── vocabulary.py
+│   ├── vocabulary_builder.py
 │   └── whitespace.py
 │
 tests/
@@ -72,6 +92,7 @@ tests/
         ├── test_tokenizer.py
         ├── test_encoding.py
         ├── test_vocabulary.py
+        ├── test_vocabulary_builder.py
         └── test_whitespace.py
 ```
 

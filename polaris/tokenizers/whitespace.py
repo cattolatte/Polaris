@@ -7,7 +7,10 @@ end-to-end using the simplest possible strategy: splitting text on
 whitespace via Python's built-in :meth:`str.split`.
 
 It intentionally performs no preprocessing, normalization, punctuation
-handling, casing changes, padding, truncation, or special-token handling.
+handling, casing changes, padding, or truncation. Unknown-token handling is
+delegated to the vocabulary: if the vocabulary defines an ``unk_token``,
+:meth:`WhitespaceTokenizer.encode` maps out-of-vocabulary tokens to its id;
+otherwise encoding an unknown token raises ``KeyError``.
 """
 
 from __future__ import annotations
@@ -113,8 +116,9 @@ class WhitespaceTokenizer:
         Raises
         ------
         KeyError
-            If any token produced by :meth:`tokenize` is not present in
-            the tokenizer's vocabulary.
+            If a token produced by :meth:`tokenize` is not present in the
+            vocabulary and the vocabulary defines no ``unk_token``. When an
+            ``unk_token`` is configured, unknown tokens map to its id instead.
 
         Examples
         --------
@@ -126,7 +130,7 @@ class WhitespaceTokenizer:
         Encoding(ids=(0, 1), tokens=('hello', 'world'))
         """
         tokens = self.tokenize(text)
-        ids = tuple(self._vocabulary.lookup_id(token) for token in tokens)
+        ids = tuple(self._vocabulary.get_id(token) for token in tokens)
         return Encoding(ids=ids, tokens=tokens)
 
     def decode(self, ids: Sequence[int]) -> str:

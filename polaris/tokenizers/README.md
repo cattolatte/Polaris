@@ -9,11 +9,22 @@ This package defines the core tokenization abstractions:
 - `Tokenizer` (`tokenizer.py`) — the behavioral contract every tokenizer
   implements: `tokenize`, `encode`, `decode`, and access to its `vocabulary`.
 - `Vocabulary` (`vocabulary.py`) — an immutable, validated bidirectional
-  mapping between tokens and integer ids.
+  mapping between tokens and integer ids. Optionally designates an unknown
+  token (`unk_token`) and a padding token (`pad_token`), exposing their ids as
+  `unk_id` / `pad_id`. `get_id` resolves unknown tokens to the unk id when one
+  is configured; `lookup_id` stays strict.
 - `Encoding` (`encoding.py`) — the immutable output of a tokenizer, pairing
   token ids with their string tokens.
 
-Concrete implementations live alongside these abstractions:
+Vocabularies are built from a corpus with a dedicated function (kept out of the
+`Vocabulary` value object so it stays a pure mapping):
+
+- `build_vocabulary` (`vocabulary_builder.py`) — counts token frequencies over
+  already-tokenized text, reserves special tokens first, orders the rest by
+  descending frequency (ties broken alphabetically for determinism), and
+  supports `min_frequency` and `max_size`.
+
+Concrete tokenizer implementations live alongside these abstractions:
 
 - `WhitespaceTokenizer` (`whitespace.py`) — the first reference implementation,
   splitting text on whitespace via `str.split`.
@@ -24,14 +35,17 @@ be added incrementally, each satisfying the same `Tokenizer` contract.
 ## Example
 
 ```python
-from polaris.tokenizers import Vocabulary, WhitespaceTokenizer
+from polaris.tokenizers import build_vocabulary, WhitespaceTokenizer
 
-vocabulary = Vocabulary({"hello": 0, "world": 1})
+# Build a vocabulary from a tokenized corpus, with special tokens.
+corpus = [text.split() for text in ["good movie", "good film", "bad movie"]]
+vocabulary = build_vocabulary(corpus, unk_token="<unk>", pad_token="<pad>")
+
 tokenizer = WhitespaceTokenizer(vocabulary=vocabulary)
 
-encoding = tokenizer.encode("hello world")
-encoding.ids     # (0, 1)
-encoding.tokens  # ('hello', 'world')
+encoding = tokenizer.encode("good unseen movie")
+encoding.ids     # e.g. (2, 1, 3) — "unseen" maps to the <unk> id (1)
+encoding.tokens  # ('good', 'unseen', 'movie')
 
-tokenizer.decode(encoding.ids)  # 'hello world'
+tokenizer.decode(encoding.ids)  # 'good <unk> movie'
 ```
