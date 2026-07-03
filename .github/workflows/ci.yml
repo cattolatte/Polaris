@@ -12,6 +12,11 @@ on:
 permissions:
   contents: read
 
+# Cancel superseded runs on the same ref to save CI minutes.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test:
     name: Python 3.12
@@ -25,14 +30,17 @@ jobs:
         uses: astral-sh/setup-uv@v6
         with:
           version: "latest"
+          enable-cache: true
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
 
+      # The `datasets` extra is required: the offline IMDB tests patch
+      # `datasets.load_dataset`, which needs the package importable.
       - name: Install dependencies
-        run: uv sync --extra dev
+        run: uv sync --extra dev --extra datasets
 
       - name: Check formatting (Black)
         run: uv run black --check .
@@ -44,4 +52,4 @@ jobs:
         run: uv run mypy polaris
 
       - name: Run tests
-        run: uv run pytest
+        run: uv run pytest --cov=polaris --cov-report=term-missing
