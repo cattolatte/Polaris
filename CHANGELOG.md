@@ -14,10 +14,14 @@ Work toward **v0.3.0 — Tokenization Foundations**. See `ROADMAP.md`.
 
 - Tokenization foundations: the `Tokenizer` protocol, `Vocabulary`, `Encoding`, and the `WhitespaceTokenizer` reference implementation.
 - Public API re-exports so components import from their package roots: `polaris.tokenizers` (`Tokenizer`, `Vocabulary`, `Encoding`, `WhitespaceTokenizer`), `polaris.data` (`Dataset`, `TextSample`), and `polaris.data.datasets` (`IMDBDataset`).
+- Architecture Decision Records under `docs/adr/`, capturing the project identity, vertical-slice architecture, the PyTorch tensor-framework decision (with model internals from scratch), the evidence-driven abstraction policy, and the dormant-Registry decision.
 
 ### Changed
 
 - Unified the project version to `0.3.0.dev0` across `version.py`, `pyproject.toml`, `uv.lock`, and the README version badge.
+- Restructured the future roadmap from horizontal layers into vertical slices and reduced scope, introducing an early end-to-end pipeline milestone (see the "What changed in this revision" section of `ROADMAP.md`).
+- Documented the `polaris/registry/` module as dormant per ADR-0005 and replaced its placeholder README with an accurate one.
+- Aligned the README with the new direction: marked the registry dormant, listed `docs/adr/`, and updated the engineering-philosophy pillars (vertical slices, evidence-driven abstraction).
 - Updated the Phase 01 and Phase 03 design docs to match the shipped code and the roadmap's deferral of configuration, logging, and the CLI.
 - Replaced the placeholder `polaris/tokenizers/README.md` with real module documentation.
 

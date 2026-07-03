@@ -15,7 +15,7 @@
 
 **Polaris is currently under active development and is not yet ready for production use.**
 
-This repository represents the beginning of a long-term effort to build a production-inspired engineering platform for engineering modern Natural Language Processing (NLP) systems, emphasizing clean architecture, reproducibility, modularity, and software engineering best practices.
+This repository represents the beginning of a long-term effort to build a production-inspired, **educational** engineering platform for modern Natural Language Processing (NLP) systems, emphasizing clean architecture, reproducibility, modularity, and software engineering best practices.
 
 </div>
 
@@ -36,6 +36,8 @@ Polaris prioritizes engineering transparency, allowing every stage of the NLP li
 Existing libraries solve specific problems. Polaris aims to connect the complete NLP engineering lifecycle into a single cohesive platform while exposing every component for learning, experimentation, and extension.
 
 Rather than hiding complexity, Polaris embraces engineering transparency so developers can understand how modern NLP systems are designed, trained, evaluated, and deployed.
+
+Polaris is a **reference implementation first**. Rather than wrapping existing frameworks, the NLP stack—tokenizers, models, and training loops—is built from scratch on PyTorch tensors, so every component can be read and understood end to end. The goal is not to compete with libraries like Hugging Face on features, but to be the clearest, best-engineered from-scratch NLP system you can learn from. See [ADR-0001](docs/adr/0001-project-identity.md).
 
 ---
 
@@ -61,7 +63,7 @@ The platform is organized into dedicated modules with clearly defined responsibi
 | Module | Description | Status |
 | :--- | :--- | :--- |
 | `core/` | Provides the foundational building blocks, interfaces, and architectural patterns for the entire platform. | ✅ Implemented |
-| `registry/` | A centralized mechanism for registering and accessing components (models, datasets, etc.) by name. | ✅ Implemented |
+| `registry/` | A mechanism for registering and accessing components by name. Implemented and tested, but currently **dormant** — no consumers yet (see [ADR-0005](docs/adr/0005-registry-dormant.md)). | 🧊 Dormant |
 | `data/` | Handles data loading and management, exposing datasets through a Polaris-native interface. | ✅ Implemented |
 | `tokenizers/` | A laboratory for building and using various tokenization strategies. | 🚧 In Progress |
 | `models/` | Provides reusable abstractions and implementations of modern NLP architectures. | 🏗️ Planned |
@@ -92,7 +94,8 @@ The project follows modern software engineering practices including:
 
 - **Clean Architecture**: Enforcing separation of concerns and dependency rules.
 - **SOLID Principles**: Creating understandable, flexible, and maintainable designs.
-- **Registry Pattern**: Decoupling component instantiation from usage.
+- **Vertical Slices**: Every release leaves the system runnable, not scaffolding for a future layer.
+- **Evidence-Driven Abstraction**: Interfaces are extracted from working code, never designed in advance.
 - **Configuration-Driven Design**: Enabling flexible and reproducible experiments.
 - **Modular Components**: Promoting reusability and independent development.
 - **Type Safety**: Using modern Python type hints to improve code quality.
@@ -108,6 +111,7 @@ Every major design decision is intended to prioritize readability, extensibility
 Comprehensive project documentation is a core goal and is available throughout the repository.
 
 - **Architecture Docs**: `docs/architecture/`
+- **Decision Records (ADRs)**: `docs/adr/`
 - **Design Docs**: `docs/design/`
 - **API Reference**: `docs/api/`
 - **Tutorials**: `docs/tutorials/`

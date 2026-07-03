@@ -1,16 +1,22 @@
 # Polaris Roadmap
 
-> Building a production-inspired NLP Engineering Platform — one engineering milestone at a time.
+> Building a production-inspired, educational NLP engineering platform — one runnable milestone at a time.
 
 ---
 
 ## Overview
 
-Polaris is being developed incrementally with a strong emphasis on software engineering quality, modular architecture, reproducibility, and maintainability.
+Polaris is developed incrementally with a strong emphasis on software engineering
+quality, modular architecture, reproducibility, and maintainability.
 
-Rather than rapidly adding features, each phase focuses on building a solid foundation that future components can rely upon.
+Polaris is an **educational, reference-implementation-first** platform: the primary
+product is the codebase itself — a from-scratch NLP system, clean enough to read as a
+teaching text and engineered well enough to run a real task reproducibly. See
+[ADR-0001](docs/adr/0001-project-identity.md).
 
-The long-term vision is to create an open-source platform that demonstrates the complete engineering lifecycle of modern Natural Language Processing systems—from raw datasets to production deployment.
+Rather than rapidly adding features, each phase delivers a **runnable vertical
+slice** — a working thread through the layers it touches — not scaffolding for a
+future layer.
 
 ---
 
@@ -38,15 +44,23 @@ No phase is considered complete until it has been documented, tested, and review
 
 ### Engineering Rules
 
-These rules were established during early development and apply to every component:
+These rules apply to every component (see also `CONTRIBUTING.md` and `docs/adr/`):
 
-- **Concrete before abstract**: Build one real implementation first. Extract abstractions only when a second implementation proves the pattern.
-- **Vertical slices over infrastructure layers**: Each release delivers working functionality, not scaffolding for future functionality.
-- **Own the interface**: Users interact only with Polaris-native abstractions. Third-party libraries (e.g., Hugging Face `datasets`) are implementation details, never public API.
-- **Test behavior, not implementation**: Tests assert the public contract, so internals can be refactored freely.
-- **Offline unit tests**: No network access, no downloads. All external backends are mocked.
+- **Concrete before abstract**: Build one real implementation first.
+- **Evidence-driven abstraction**: Extract an abstraction only when **two or more**
+  concrete implementations demand it ([ADR-0004](docs/adr/0004-abstraction-policy.md)).
+- **Vertical slices over horizontal layers**: Every release leaves Polaris in a
+  **runnable** state ([ADR-0002](docs/adr/0002-vertical-slice-architecture.md)). Never
+  build a model you can't train, or a trainer with nothing to train.
+- **Own the interface**: Third-party libraries (Hugging Face `datasets`, PyTorch) are
+  implementation details, never public API.
+- **Test behavior, not implementation**: Tests assert the public contract.
+- **Offline unit tests**: No network access, no downloads. External backends are
+  mocked.
+- **Never introduce speculative infrastructure**: Configuration, logging, callbacks,
+  registries, and the CLI are built when a real component requires them, not before.
 - **Strict tooling**: Black, Ruff, MyPy (strict), and Pytest gate every merge.
-- **Infrastructure when needed**: Configuration, logging, and CLI are built when a real component requires them, not before.
+- **Document major decisions**: significant architectural choices become ADRs.
 
 ---
 
@@ -55,8 +69,14 @@ These rules were established during early development and apply to every compone
 | Item | Status |
 |------|--------------------------|
 | Current Version | `v0.3.0-dev` |
-| Development Stage | Tokenization Foundations |
+| Development Stage | Tokenization Foundations → First End-to-End Slice |
 | Overall Progress | 🚧 Active Development |
+
+> **Roadmap revised 2026-07-03.** The future phases below were restructured from
+> horizontal layers into vertical slices, and scope was reduced, following the
+> architecture review captured in [ADR-0002](docs/adr/0002-vertical-slice-architecture.md)
+> and [ADR-0003](docs/adr/0003-tensor-framework.md). Completed phases are unchanged.
+> See **"What changed in this revision"** at the end.
 
 ---
 
@@ -95,20 +115,19 @@ Build the minimal engineering foundation that every future Polaris module depend
 
 - Core framework (protocols, shared types)
 - Exception hierarchy (`PolarisError` and subclasses)
-- Registry system
+- Registry system *(built here, now dormant — see [ADR-0005](docs/adr/0005-registry-dormant.md))*
 - CI/CD pipeline
 - Strict typing and quality tooling
 
 **Deliberately Deferred**
 
-- Configuration system → built when Training/Experiments need it (v0.5–v0.6)
-- Logging → built when the Training Engine needs it (v0.5)
-- CLI → built alongside Deployment (v0.9)
+- Configuration system → built when the Training Engine matures (v0.6)
+- Logging → built when the Training Engine needs it (v0.6)
+- CLI → introduced early and grown incrementally from v0.4 onward
 
 **Outcome**
 
-A stable, minimal engineering foundation. Infrastructure is added when a
-real component requires it, not speculatively.
+A stable, minimal engineering foundation.
 
 ---
 
@@ -124,18 +143,9 @@ Establish the core data contract and prove it with one real dataset.
 
 - `TextSample` — immutable core data abstraction ✅
 - `Dataset` protocol — read-only collection contract ✅
-- `IMDBDataset` — first concrete dataset, backed by Hugging Face
-  behind a Polaris-native interface ✅
+- `IMDBDataset` — first concrete dataset, backed by Hugging Face behind a
+  Polaris-native interface ✅
 - Offline test suite with mocked backend ✅
-- Documentation and release ✅
-
-**Deliberately Deferred** (until multiple datasets exist)
-
-- Dataset registry integration
-- Transforms and preprocessing
-- Splitting utilities
-- Caching layer
-- Dataset metadata protocol
 
 **Outcome**
 
@@ -153,161 +163,186 @@ Build the tokenization contract and prove it with the simplest real tokenizer.
 
 **Major Components (in order)**
 
-1. Tokenizer interface
-2. Vocabulary
-3. Encoding abstraction
-4. Whitespace tokenizer (first concrete implementation)
+1. Tokenizer interface ✅
+2. Vocabulary ✅
+3. Encoding abstraction ✅
+4. Whitespace tokenizer (first concrete implementation) ✅
 
-**Follow-up Releases (v0.3.x)**
+**Note**
 
-- WordPiece
-- BPE
-- SentencePiece
-- Character / Unigram tokenizers
-- Tokenizer benchmarking
+The whitespace tokenizer is **sufficient to reach the first end-to-end slice (v0.4).**
+Additional tokenizers (Character, BPE, WordPiece, SentencePiece, Unigram) are
+**incremental v0.3.x work and are not blocking** — they are added opportunistically,
+each as its own small slice, once the pipeline exists. Extracting further shared
+tokenizer abstractions waits for a second real algorithm (per ADR-0004).
 
 **Outcome**
 
-A modular tokenization contract proven by real implementations,
-extended incrementally rather than all at once.
+A modular tokenization contract, proven by a real implementation, ready to feed the
+first end-to-end pipeline.
 
 ---
 
-## v0.4.0 — Model Zoo
+## v0.4.0 — First End-to-End Slice ("Hello, IMDB")
+
+Status: ⏳ Planned — **the pivotal vertical slice**
+
+**Goal**
+
+Deliver the thinnest **runnable** thread from raw text to a measured result. After
+this release, a user can train a real sentiment classifier on IMDB, end to end, in a
+few lines. This is where PyTorch enters the project
+([ADR-0003](docs/adr/0003-tensor-framework.md)).
+
+**Major Components (each minimal, in dependency order)**
+
+1. **Collation / batching** — the missing seam between tokenizers and models:
+   padding, truncation, attention masks, and conversion to PyTorch tensors. Turns a
+   sequence of `Encoding`s into a batch.
+2. **One small from-scratch model** — the simplest thing that proves the pipeline
+   (e.g. embedding → mean-pool → linear classification head). No transformer yet.
+3. **Minimal training loop** — forward, loss, backward, optimizer step, over epochs.
+   Explicit function arguments for hyperparameters — **no config system, no callbacks,
+   no checkpointing, no distributed, no mixed precision.**
+4. **Basic evaluation** — loss and accuracy on the test split.
+5. **Reproducibility seed utility** — deterministic seeding (`utils`), the first
+   concrete home for the reproducibility pillar.
+6. **A thin `polaris` CLI entry** — e.g. `polaris info`; grown each subsequent phase.
+7. **A runnable example / notebook** demonstrating the full slice.
+
+**Explicitly deferred to later slices**
+
+- Transformers, `Model`/`Trainer` abstractions, config system, checkpointing,
+  callbacks, schedulers, experiment tracking.
+
+**Outcome**
+
+Polaris runs an NLP task end to end. Every later phase thickens one layer of this
+proven pipeline.
+
+---
+
+## v0.5.0 — Transformer Encoder (from scratch)
 
 Status: ⏳ Planned
 
 **Goal**
 
-Implement reusable abstractions and modern NLP architectures.
+Thicken the model layer with the educational centerpiece: a transformer encoder
+implemented **from scratch** on tensor primitives, reusing the v0.4 collation,
+training, and evaluation harness unchanged (which proves the seams).
 
 **Major Components**
 
-- Base models
-- Encoder architectures
-- Decoder architectures
-- Seq2Seq models
-- Classification models
-- Foundation model interfaces
+- Scaled dot-product attention, multi-head attention (from scratch)
+- Positional encoding, layer normalization, feed-forward block, residual connections
+- A transformer-encoder text classifier
+- Trained on IMDB and compared against the v0.4 baseline
+- **Extract the `Model` abstraction now** — a second concrete model justifies it
+  (ADR-0004)
 
 **Outcome**
 
-Reusable NLP model implementations.
+A readable, correct, from-scratch transformer, runnable end to end — the core teaching
+artifact of Polaris.
 
 ---
 
-## v0.5.0 — Training Engine
+## v0.6.0 — Training Engine Maturity
 
 Status: ⏳ Planned
 
 **Goal**
 
-Develop the runtime engine responsible for model training and inference.
+Thicken the training layer into a real, reusable engine — driven by the fact that two
+model trainings now exist.
 
 **Major Components**
 
-- Training loops
-- Checkpointing
-- Callbacks
-- Optimizers
+- Extract the `Trainer` abstraction (justified by ≥2 training uses)
+- Checkpointing (save/restore)
+- Callbacks / hooks (e.g. early stopping, metric logging)
 - Learning-rate schedulers
-- Mixed precision
-- Distributed training
-- Logging infrastructure (introduced here, where it is first needed)
+- **Configuration system** — introduced *here*, where config-driven runs first add
+  real value (small, typed, Pydantic-based)
+- **Logging infrastructure** — introduced *here*, where it is first needed
+
+**Deferred to post-1.0**
+
+- Distributed / multi-GPU training, mixed precision (see Post-1.0)
 
 **Outcome**
 
-Production-inspired training infrastructure.
+Production-inspired, single-device training infrastructure that stays runnable and
+now reproducible from config.
 
 ---
 
-## v0.6.0 — Experiment Tracking
+## v0.7.0 — Evaluation Framework
 
 Status: ⏳ Planned
 
 **Goal**
 
-Provide reproducible experiment management.
+Grow the basic v0.4 metrics into a comprehensive, reusable evaluation framework.
 
 **Major Components**
 
-- Configuration system (introduced here, where experiments require it)
-- MLflow integration
-- TensorBoard integration
-- Run tracking
-- Configuration snapshots
-- Artifact management
-
-**Outcome**
-
-Complete experiment reproducibility.
-
----
-
-## v0.7.0 — Evaluation Engine
-
-Status: ⏳ Planned
-
-**Goal**
-
-Build a comprehensive evaluation framework.
-
-**Major Components**
-
-- Classification metrics
-- Generation metrics
-- Retrieval metrics
+- Classification metrics (accuracy, precision/recall/F1, confusion matrix)
+- An evaluation harness decoupled from training
 - Benchmark reports
-- Performance evaluation
+- **Essential visualization folded in here**: training curves and confusion-matrix
+  plots (richer viz — attention/embeddings — is post-1.0)
 
 **Outcome**
 
-Reliable and reproducible evaluation.
+Reliable, reproducible measurement of model quality.
 
 ---
 
-## v0.8.0 — Visualization
+## v0.8.0 — Experiment Tracking & Reproducibility
 
 Status: ⏳ Planned
 
 **Goal**
 
-Create visualization tools for analysis and debugging.
+Make runs reproducible and comparable.
 
 **Major Components**
 
-- Training curves
-- Confusion matrices
-- Embedding visualization
-- Attention visualization
-- Error analysis
+- A Polaris-native tracking interface backed by **one** backend first (concrete before
+  abstract — a second backend only if a real need appears)
+- Run tracking, configuration snapshots, artifact management
+- Reproducibility: seed capture, environment capture
+- **Registry reconsidered here** — experiment tracking is the likely first real
+  consumer of component discovery (ADR-0005); reactivate and validate against the need
+  if it materializes
 
 **Outcome**
 
-Improved interpretability.
+Complete, reproducible experiment management.
 
 ---
 
-## v0.9.0 — Deployment
+## v0.9.0 — Deployment & CLI
 
 Status: ⏳ Planned
 
 **Goal**
 
-Deploy trained models using production-inspired workflows.
+Make trained models usable outside a script, via production-inspired workflows.
 
 **Major Components**
 
-- FastAPI
-- Docker
-- ONNX
-- REST API
-- CLI (introduced here, where there is real functionality to expose)
-- CLI inference
+- Inference runtime (`inference/`) — run predictions with a trained model
+- The `polaris` CLI matured into the primary UX (it has been growing since v0.4):
+  train, evaluate, predict
+- Packaging: FastAPI/REST serving and Docker
+- ONNX export *(optional / best-effort — kept out of the critical path)*
 
 **Outcome**
 
-Production-ready deployment pipeline.
+A trained Polaris model can be served and invoked as a real product.
 
 ---
 
@@ -317,16 +352,16 @@ Status: 🔒 Future
 
 **Goal**
 
-Release the first stable version of Polaris.
+Release the first stable version: one cohesive, from-scratch NLP system that reads as
+a teaching text and runs a real task reproducibly, end to end.
 
 **Objectives**
 
-- Stable APIs
-- Comprehensive documentation
-- Complete testing
-- Modular architecture
-- Reproducible workflows
-- Public releases
+- Stable public APIs
+- Comprehensive documentation and tutorials
+- Complete testing (with a CI matrix and coverage gate)
+- Modular architecture, reproducible workflows
+- Public release
 
 **Outcome**
 
@@ -334,19 +369,56 @@ First production-ready public release.
 
 ---
 
-## Future Vision
+## Post-1.0 / Future Vision
 
-Following the initial stable release, Polaris may expand into additional areas such as:
+Deliberately **out of scope** before v1.0 to protect quality and focus. Each would
+arrive as its own vertical slice:
 
-- **Plugin Ecosystem**: Allow for community-driven extensions and integrations.
-- **Interactive Dashboards**: Provide web-based UIs for monitoring and analysis.
-- **Benchmark Leaderboards**: Track and compare model performance on standard tasks.
-- **Educational Notebooks**: Offer tutorials and deep-dives into NLP concepts using Polaris.
-- **Research Implementations**: Serve as a platform for implementing and sharing new research.
-- **Model & Dataset Hubs**: Integrate with popular hubs for easy access to pre-trained assets.
-- **Advanced MLOps**: Deepen integrations with MLOps tools for production lifecycle management.
+- **More architectures**: decoder / causal LM, seq2seq, text generation.
+- **More tokenizers**: the full BPE / WordPiece / SentencePiece / Unigram family
+  (beyond the incremental v0.3.x additions), plus tokenizer training and benchmarking.
+- **Scale**: distributed / multi-GPU training, mixed precision.
+- **Richer visualization**: attention maps, embedding projections, error analysis.
+- **Additional tracking backends** (e.g. MLflow *and* TensorBoard).
+- **Plugin ecosystem**, interactive dashboards, benchmark leaderboards, model/dataset
+  hub integrations, advanced MLOps.
 
-These features are intentionally outside the scope of the initial v1.0 release.
+These are intentionally excluded from the initial v1.0 release.
+
+---
+
+## Cross-Cutting Quality Goals
+
+Ongoing, not tied to a single phase:
+
+- **CI hardening**: expand from single-version to a Python/OS matrix; enforce a
+  coverage threshold.
+- **ADRs**: every major architectural decision is recorded in `docs/adr/`.
+- **Just-in-time design docs**: each phase's `docs/design/phase_NN_*.md` is written
+  immediately before implementation, not in advance.
+
+---
+
+## What changed in this revision (2026-07-03)
+
+For transparency, the future roadmap was restructured and **scope was reduced**:
+
+- **Horizontal layers → vertical slices.** The old "Model Zoo → Training → Evaluation"
+  layering is replaced by an early end-to-end slice (v0.4) that is then thickened.
+- **Model Zoo trimmed.** Six planned architectures become one baseline classifier
+  (v0.4) + one from-scratch transformer encoder (v0.5). Decoder / seq2seq / generation
+  move to Post-1.0. **"Foundation model interfaces" removed** pre-1.0.
+- **Metrics and config repositioned.** Basic metrics arrive with the first slice
+  (v0.4); the config system arrives with the mature trainer (v0.6), not after a
+  separate training phase.
+- **Collation layer added** — previously missing between tokenizers and models.
+- **Experiment tracking reduced** to a single backend first.
+- **Distributed training & mixed precision deferred** to Post-1.0.
+- **Standalone Visualization phase removed** — essentials folded into Evaluation
+  (v0.7); the rest is Post-1.0.
+- **CLI pulled earlier** — a thin CLI from v0.4, grown per phase, instead of a v0.9
+  big-bang.
+- **Tensor framework decided**: PyTorch, with model internals from scratch (ADR-0003).
 
 ---
 
@@ -355,13 +427,17 @@ These features are intentionally outside the scope of the initial v1.0 release.
 Every feature added to Polaris should satisfy the following principles:
 
 - **Simplicity**: Prefer simple, clear solutions over unnecessary complexity.
-- **Modularity**: Design components that are loosely coupled and independently maintainable.
-- **Readability**: Write code that is easy for others to understand.
+- **Modularity**: Design components that are loosely coupled and independently
+  maintainable.
+- **Readability**: Write code that is easy for others to understand — the reader is a
+  learner.
 - **Reproducibility**: Ensure that experiments and results are repeatable.
 - **Documentation**: Treat documentation as a core part of the implementation.
-- **Testing**: Validate functionality and prevent regressions through a robust test suite.
+- **Testing**: Validate functionality and prevent regressions through a robust test
+  suite.
 - **Quality**: Prioritize engineering quality over development speed.
-- **Evidence-driven abstraction**: Abstractions are extracted from working code, never designed in advance of it.
+- **Evidence-driven abstraction**: Abstractions are extracted from working code, never
+  designed in advance of it.
 
 ---
 
@@ -376,4 +452,6 @@ Every feature added to Polaris should satisfy the following principles:
 
 ---
 
-> Polaris is a long-term engineering project focused on understanding, building, and maintaining modern NLP systems through production-inspired software engineering practices.
+> Polaris is a long-term engineering project focused on understanding, building, and
+> maintaining modern NLP systems through production-inspired software engineering
+> practices.
