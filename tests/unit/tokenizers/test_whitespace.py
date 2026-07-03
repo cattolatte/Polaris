@@ -15,7 +15,6 @@ from polaris.tokenizers.tokenizer import Tokenizer
 from polaris.tokenizers.vocabulary import Vocabulary
 from polaris.tokenizers.whitespace import WhitespaceTokenizer
 
-
 # ---------------------------------------------------------------------------
 # Construction
 # ---------------------------------------------------------------------------
