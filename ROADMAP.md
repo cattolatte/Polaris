@@ -68,8 +68,8 @@ These rules apply to every component (see also `CONTRIBUTING.md` and `docs/adr/`
 
 | Item | Status |
 |------|--------------------------|
-| Current Version | `v0.3.0-dev` |
-| Development Stage | Tokenization Foundations → First End-to-End Slice |
+| Current Version | `v0.3.0` |
+| Development Stage | First End-to-End Slice (v0.4, upcoming) |
 | Overall Progress | 🚧 Active Development |
 
 > **Roadmap revised 2026-07-03.** The future phases below were restructured from
@@ -155,7 +155,7 @@ A proven data contract and the template for every future dataset wrapper.
 
 ## v0.3.0 — Tokenization Foundations
 
-Status: 🚧 In Progress
+Status: ✅ Completed
 
 **Goal**
 

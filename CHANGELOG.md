@@ -6,9 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ---
 
-## [Unreleased]
+## [v0.3.0] - 2026-07-03
 
-Work toward **v0.3.0 — Tokenization Foundations**. See `ROADMAP.md`.
+Tokenization Foundations. The tokenizer contract, proven with a real
+implementation, plus the vocabulary tooling required to train on a real dataset.
+Also adopts the vertical-slice architecture and records the project's major
+decisions as ADRs.
 
 ### Added
 
