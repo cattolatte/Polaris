@@ -19,11 +19,9 @@ The long-term vision is to create an open-source platform that demonstrates the 
 Every phase of Polaris follows the same engineering workflow:
 
 ```text
-Architecture
+Concrete Implementation
         ↓
 Design Review
-        ↓
-Implementation
         ↓
 Testing
         ↓
@@ -32,18 +30,32 @@ Documentation
 Code Review
         ↓
 Release
+        ↓
+Extract Abstractions (when a second implementation proves the pattern)
 ```
 
 No phase is considered complete until it has been documented, tested, and reviewed.
+
+### Engineering Rules
+
+These rules were established during early development and apply to every component:
+
+- **Concrete before abstract**: Build one real implementation first. Extract abstractions only when a second implementation proves the pattern.
+- **Vertical slices over infrastructure layers**: Each release delivers working functionality, not scaffolding for future functionality.
+- **Own the interface**: Users interact only with Polaris-native abstractions. Third-party libraries (e.g., Hugging Face `datasets`) are implementation details, never public API.
+- **Test behavior, not implementation**: Tests assert the public contract, so internals can be refactored freely.
+- **Offline unit tests**: No network access, no downloads. All external backends are mocked.
+- **Strict tooling**: Black, Ruff, MyPy (strict), and Pytest gate every merge.
+- **Infrastructure when needed**: Configuration, logging, and CLI are built when a real component requires them, not before.
 
 ---
 
 ## Current Status
 
 | Item | Status |
-|------|--------|
-| Current Version | `v0.0.1-alpha` |
-| Development Stage | Repository Initialization |
+|------|--------------------------|
+| Current Version | `v0.3.0-dev` |
+| Development Stage | Tokenization Foundations |
 | Overall Progress | 🚧 Active Development |
 
 ---
@@ -54,7 +66,7 @@ No phase is considered complete until it has been documented, tested, and review
 
 Status: ✅ Completed
 
-Objectives
+**Objectives**
 
 - Initialize repository
 - Define project architecture
@@ -62,7 +74,7 @@ Objectives
 - Create project documentation
 - Prepare development environment
 
-Deliverables
+**Deliverables**
 
 - Initial repository scaffold
 - Documentation structure
@@ -73,77 +85,91 @@ Deliverables
 
 ## v0.1.0 — Foundation
 
-Status: ⏳ Planned
+Status: ✅ Completed
 
-Goal
+**Goal**
 
-Build the engineering foundation that every future Polaris module depends on.
+Build the minimal engineering foundation that every future Polaris module depends on.
 
-Major Components
+**Major Components**
 
-- Core framework
-- Configuration system
-- Logging
-- Exceptions
+- Core framework (protocols, shared types)
+- Exception hierarchy (`PolarisError` and subclasses)
 - Registry system
-- CLI
-- Utilities
-- Version management
+- CI/CD pipeline
+- Strict typing and quality tooling
 
-Outcome
+**Deliberately Deferred**
 
-A stable engineering foundation for future development.
+- Configuration system → built when Training/Experiments need it (v0.5–v0.6)
+- Logging → built when the Training Engine needs it (v0.5)
+- CLI → built alongside Deployment (v0.9)
 
----
+**Outcome**
 
-## v0.2.0 — Dataset Engine
-
-Status: ⏳ Planned
-
-Goal
-
-Design a reusable and extensible dataset management system.
-
-Major Components
-
-- Dataset abstraction
-- Data loading
-- Dataset registry
-- Validation
-- Preprocessing
-- Data transforms
-- Splitting
-- Metadata
-- Caching
-
-Outcome
-
-A production-inspired data pipeline.
+A stable, minimal engineering foundation. Infrastructure is added when a
+real component requires it, not speculatively.
 
 ---
 
-## v0.3.0 — Tokenizer Laboratory
+## v0.2.0 — Data Foundations
 
-Status: ⏳ Planned
+Status: ✅ Completed
 
-Goal
+**Goal**
 
-Build a complete experimentation environment for modern NLP tokenization.
+Establish the core data contract and prove it with one real dataset.
 
-Major Components
+**Major Components**
 
-- Word tokenizer
-- Character tokenizer
-- BPE
+- `TextSample` — immutable core data abstraction ✅
+- `Dataset` protocol — read-only collection contract ✅
+- `IMDBDataset` — first concrete dataset, backed by Hugging Face
+  behind a Polaris-native interface ✅
+- Offline test suite with mocked backend ✅
+- Documentation and release ✅
+
+**Deliberately Deferred** (until multiple datasets exist)
+
+- Dataset registry integration
+- Transforms and preprocessing
+- Splitting utilities
+- Caching layer
+- Dataset metadata protocol
+
+**Outcome**
+
+A proven data contract and the template for every future dataset wrapper.
+
+---
+
+## v0.3.0 — Tokenization Foundations
+
+Status: 🚧 In Progress
+
+**Goal**
+
+Build the tokenization contract and prove it with the simplest real tokenizer.
+
+**Major Components (in order)**
+
+1. Tokenizer interface
+2. Vocabulary
+3. Encoding abstraction
+4. Whitespace tokenizer (first concrete implementation)
+
+**Follow-up Releases (v0.3.x)**
+
 - WordPiece
+- BPE
 - SentencePiece
-- Unigram
-- Vocabulary management
+- Character / Unigram tokenizers
 - Tokenizer benchmarking
 
-Outcome
+**Outcome**
 
-A modular tokenizer framework.
+A modular tokenization contract proven by real implementations,
+extended incrementally rather than all at once.
 
 ---
 
@@ -151,11 +177,11 @@ A modular tokenizer framework.
 
 Status: ⏳ Planned
 
-Goal
+**Goal**
 
 Implement reusable abstractions and modern NLP architectures.
 
-Major Components
+**Major Components**
 
 - Base models
 - Encoder architectures
@@ -164,7 +190,7 @@ Major Components
 - Classification models
 - Foundation model interfaces
 
-Outcome
+**Outcome**
 
 Reusable NLP model implementations.
 
@@ -174,11 +200,11 @@ Reusable NLP model implementations.
 
 Status: ⏳ Planned
 
-Goal
+**Goal**
 
 Develop the runtime engine responsible for model training and inference.
 
-Major Components
+**Major Components**
 
 - Training loops
 - Checkpointing
@@ -187,8 +213,9 @@ Major Components
 - Learning-rate schedulers
 - Mixed precision
 - Distributed training
+- Logging infrastructure (introduced here, where it is first needed)
 
-Outcome
+**Outcome**
 
 Production-inspired training infrastructure.
 
@@ -198,19 +225,20 @@ Production-inspired training infrastructure.
 
 Status: ⏳ Planned
 
-Goal
+**Goal**
 
 Provide reproducible experiment management.
 
-Major Components
+**Major Components**
 
+- Configuration system (introduced here, where experiments require it)
 - MLflow integration
 - TensorBoard integration
 - Run tracking
 - Configuration snapshots
 - Artifact management
 
-Outcome
+**Outcome**
 
 Complete experiment reproducibility.
 
@@ -220,11 +248,11 @@ Complete experiment reproducibility.
 
 Status: ⏳ Planned
 
-Goal
+**Goal**
 
 Build a comprehensive evaluation framework.
 
-Major Components
+**Major Components**
 
 - Classification metrics
 - Generation metrics
@@ -232,7 +260,7 @@ Major Components
 - Benchmark reports
 - Performance evaluation
 
-Outcome
+**Outcome**
 
 Reliable and reproducible evaluation.
 
@@ -242,11 +270,11 @@ Reliable and reproducible evaluation.
 
 Status: ⏳ Planned
 
-Goal
+**Goal**
 
 Create visualization tools for analysis and debugging.
 
-Major Components
+**Major Components**
 
 - Training curves
 - Confusion matrices
@@ -254,7 +282,7 @@ Major Components
 - Attention visualization
 - Error analysis
 
-Outcome
+**Outcome**
 
 Improved interpretability.
 
@@ -264,19 +292,20 @@ Improved interpretability.
 
 Status: ⏳ Planned
 
-Goal
+**Goal**
 
 Deploy trained models using production-inspired workflows.
 
-Major Components
+**Major Components**
 
 - FastAPI
 - Docker
 - ONNX
 - REST API
+- CLI (introduced here, where there is real functionality to expose)
 - CLI inference
 
-Outcome
+**Outcome**
 
 Production-ready deployment pipeline.
 
@@ -286,11 +315,11 @@ Production-ready deployment pipeline.
 
 Status: 🔒 Future
 
-Goal
+**Goal**
 
 Release the first stable version of Polaris.
 
-Objectives
+**Objectives**
 
 - Stable APIs
 - Comprehensive documentation
@@ -299,7 +328,7 @@ Objectives
 - Reproducible workflows
 - Public releases
 
-Outcome
+**Outcome**
 
 First production-ready public release.
 
@@ -332,6 +361,7 @@ Every feature added to Polaris should satisfy the following principles:
 - **Documentation**: Treat documentation as a core part of the implementation.
 - **Testing**: Validate functionality and prevent regressions through a robust test suite.
 - **Quality**: Prioritize engineering quality over development speed.
+- **Evidence-driven abstraction**: Abstractions are extracted from working code, never designed in advance of it.
 
 ---
 
