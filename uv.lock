@@ -1066,7 +1066,7 @@ wheels = [
 
 [[package]]
 name = "polaris-nlp"
-version = "0.1.0a0"
+version = "0.3.0.dev0"
 source = { editable = "." }
 dependencies = [
     { name = "pydantic" },
