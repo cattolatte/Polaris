@@ -65,7 +65,7 @@ The platform is organized into dedicated modules with clearly defined responsibi
 | `core/` | Provides the foundational building blocks, interfaces, and architectural patterns for the entire platform. | ✅ Implemented |
 | `registry/` | A mechanism for registering and accessing components by name. Implemented and tested, but currently **dormant** — no consumers yet (see [ADR-0005](docs/adr/0005-registry-dormant.md)). | 🧊 Dormant |
 | `data/` | Handles data loading and management, exposing datasets through a Polaris-native interface. | ✅ Implemented |
-| `tokenizers/` | A laboratory for building and using various tokenization strategies. | 🚧 In Progress |
+| `tokenizers/` | A laboratory for building and using various tokenization strategies. | ✅ Implemented |
 | `models/` | Provides reusable abstractions and implementations of modern NLP architectures. | 🏗️ Planned |
 | `training/` | The core training engine, orchestrating training loops, checkpointing, and optimization. | 🏗️ Planned |
 | `experiments/` | Manages experiment tracking, logging, and versioning of results. | 🏗️ Planned |
