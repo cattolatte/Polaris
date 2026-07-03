@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ---
 
+## [Unreleased]
+
+Work toward **v0.4.0 — First End-to-End Slice**. See `ROADMAP.md`.
+
+---
+
 ## [v0.3.0] - 2026-07-03
 
 Tokenization Foundations. The tokenizer contract, proven with a real
