@@ -10,6 +10,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 Work toward **v0.9.0 — Subword Tokenization (BPE)**. See `ROADMAP.md`.
 
+### Added
+
+- From-scratch Byte Pair Encoding: `train_bpe` learns subword merges from a corpus, and `BPETokenizer` (the second concrete `Tokenizer`) tokenizes with them — splitting rare/unseen words into known subwords instead of `<unk>`.
+
 ---
 
 ## [v0.8.0] - 2026-07-04
