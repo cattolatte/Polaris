@@ -37,10 +37,11 @@ jobs:
         with:
           python-version: "3.12"
 
-      # The `datasets` extra is required: the offline IMDB tests patch
-      # `datasets.load_dataset`, which needs the package importable.
+      # `datasets`: the offline IMDB tests patch `datasets.load_dataset`, which
+      # needs the package importable. `torch`: the collation/model/training
+      # tests use PyTorch (CPU wheels on Linux, configured in pyproject).
       - name: Install dependencies
-        run: uv sync --extra dev --extra datasets
+        run: uv sync --extra dev --extra datasets --extra torch
 
       - name: Check formatting (Black)
         run: uv run black --check .
