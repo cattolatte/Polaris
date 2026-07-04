@@ -110,9 +110,15 @@ then compose.
 4. **Transformer encoder classifier** — token embeddings + positional encoding →
    N blocks → masked pooling → linear head. Consumes a `Batch`, returns logits;
    drop-in compatible with the v0.4 training loop.
-5. **`Model` abstraction** — a minimal `@runtime_checkable` protocol
-   (`Batch -> logits`) now justified by two concrete models (ADR-0004). Both
-   `MeanPoolingClassifier` and `TransformerEncoderClassifier` satisfy it.
+5. **`Model` abstraction — deferred (decision).** Two concrete models now exist,
+   but no *consumer* needs a Polaris-specific model protocol: the training loop
+   and evaluation already treat models polymorphically via `nn.Module` (the real
+   shared contract is "an `nn.Module` whose `forward` takes a `Batch` and returns
+   logits"). Per ADR-0004 and the ADR-0005 lesson, extracting a protocol with no
+   consumer would be speculative — a dead abstraction. We therefore **defer** it
+   until something actually needs it (e.g. a model registry or config-driven
+   model selection in v0.6+). The N≥2 rule is necessary, not sufficient: there
+   must also be a consumer.
 6. **Example** — train the transformer on IMDB, reusing the collation, training,
    and evaluation from v0.4, and report the same metrics for comparison against
    the baseline.
@@ -126,8 +132,9 @@ then compose.
   `optim`, embeddings, and linear layers.
 - **Reuse proves the seams.** Collation, training, and evaluation are not
   modified. If they need changing, that is a signal to examine the abstraction.
-- **Extract the abstraction now, not before.** The `Model` protocol appears here
-  because the second model finally justifies it.
+- **Abstractions need a consumer, not just two implementations.** We *defer* a
+  `Model` protocol: two models exist, but nothing consumes them through a Polaris
+  interface (see component 5).
 - **Readable over fast.** No performance tricks; the naive, correct formulation.
 
 ---
@@ -143,7 +150,6 @@ Offline, on tiny fixtures. Assert shapes and invariants, not exact floats:
   expected.
 - The classifier returns `(batch, num_classes)` and trains (loss decreases) on a
   tiny synthetic dataset via the existing `train` loop.
-- Both models satisfy the extracted `Model` protocol (`isinstance` check).
 
 ---
 
@@ -151,7 +157,7 @@ Offline, on tiny fixtures. Assert shapes and invariants, not exact floats:
 
 - From-scratch attention, multi-head attention, transformer block, layer norm
 - `TransformerEncoderClassifier`
-- Extracted `Model` protocol
+- A documented decision to defer the `Model` abstraction (no consumer yet)
 - A transformer training example reusing the v0.4 harness
 - Complete offline tests, documentation, green CI
 

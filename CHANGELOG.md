@@ -10,6 +10,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 Work toward **v0.5.0 — Transformer Encoder (from scratch)**. See `ROADMAP.md`.
 
+### Added
+
+- From-scratch attention (`polaris.models.attention`): `scaled_dot_product_attention` and `MultiHeadSelfAttention`.
+- From-scratch transformer building blocks (`polaris.models.transformer`): `LayerNorm`, `SinusoidalPositionalEncoding`, and a pre-norm `TransformerEncoderBlock`.
+- `TransformerEncoderClassifier` (`polaris.models`) — a transformer text classifier that reuses the v0.4 collation, training, and evaluation unchanged.
+
 ---
 
 ## [v0.4.1] - 2026-07-04
