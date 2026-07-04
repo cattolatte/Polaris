@@ -10,6 +10,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 Work toward **v0.6.0 — Training Engine Maturity**. See `ROADMAP.md`.
 
+### Added
+
+- `WarmupSchedule` (`polaris.training`): a from-scratch learning-rate schedule with linear warmup then cosine/linear decay — the ingredient the transformer needs to train well.
+- Checkpointing (`polaris.training.save_checkpoint` / `load_checkpoint`): save and restore model + optimizer state with metadata.
+- `get_logger` (`polaris.utils`): a standard-library logger for the training engine.
+
 ---
 
 ## [v0.5.0] - 2026-07-04
