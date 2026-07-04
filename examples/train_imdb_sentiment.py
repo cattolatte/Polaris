@@ -1,13 +1,15 @@
 """Train a sentiment classifier on IMDB, end to end.
 
-This is the runnable proof of Polaris' first end-to-end slice (v0.4). It loads
-IMDB, builds a vocabulary from the training split, tokenizes and collates the
-reviews into batches, trains a ``MeanPoolingClassifier``, and reports accuracy on
-the test split.
+Loads IMDB, builds a vocabulary from the training split, tokenizes and collates
+the reviews into batches, trains a model, and reports metrics on the test split.
 
-The model is a deliberately simple baseline (mean-pooled embeddings + a linear
-head), so it is fast on CPU and easy to read — not state of the art. The defaults
-below are small on purpose; increase them for a better score.
+Set ``MODEL`` below to choose the model — the same data, collation, training,
+and evaluation code is reused either way (that reuse is the point):
+
+- ``"transformer"`` (default): the from-scratch transformer encoder (v0.5).
+- ``"pooling"``: the mean-pooled-embeddings baseline (v0.4).
+
+The defaults are small so it runs quickly; increase them for a better score.
 
 Run it with the optional extras installed::
 
@@ -30,7 +32,7 @@ from polaris.evaluation import (
     precision_recall_f1,
     predict,
 )
-from polaris.models import MeanPoolingClassifier
+from polaris.models import MeanPoolingClassifier, TransformerEncoderClassifier
 from polaris.tokenizers import WhitespaceTokenizer, build_vocabulary
 from polaris.training import train
 from polaris.utils import resolve_device, set_seed
@@ -44,9 +46,22 @@ TEST_SAMPLES = 5000
 MAX_VOCAB = 20_000
 MAX_LENGTH = 256
 BATCH_SIZE = 32
-EMBEDDING_DIM = 64
+
+# Which model to train: "transformer" (from scratch, v0.5) or "pooling" (v0.4).
+MODEL = "transformer"
+
+EMBEDDING_DIM = 64  # mean-pooling baseline
+
+# Transformer hyperparameters
+EMBED_DIM = 128
+NUM_HEADS = 4
+NUM_LAYERS = 2
+FF_DIM = 256
+DROPOUT = 0.1
+
 EPOCHS = 5
-LEARNING_RATE = 1e-2
+# Transformers prefer a smaller learning rate than the pooling baseline.
+LEARNING_RATE = 5e-4 if MODEL == "transformer" else 1e-2
 
 # Regularization to curb overfitting (train loss collapses far below test loss).
 MIN_FREQUENCY = 2  # drop tokens seen only once — they tend to be memorized
@@ -85,6 +100,31 @@ def make_batches(
     return batches
 
 
+def build_model(*, vocab_size: int, pad_id: int) -> torch.nn.Module:
+    """Construct the model selected by ``MODEL``."""
+    if MODEL == "transformer":
+        return TransformerEncoderClassifier(
+            vocab_size=vocab_size,
+            num_classes=NUM_CLASSES,
+            embed_dim=EMBED_DIM,
+            num_heads=NUM_HEADS,
+            num_layers=NUM_LAYERS,
+            ff_dim=FF_DIM,
+            max_len=MAX_LENGTH,
+            dropout=DROPOUT,
+            pad_id=pad_id,
+        )
+    if MODEL == "pooling":
+        return MeanPoolingClassifier(
+            vocab_size=vocab_size,
+            num_classes=NUM_CLASSES,
+            embedding_dim=EMBEDDING_DIM,
+            pad_id=pad_id,
+        )
+    msg = f"unknown MODEL {MODEL!r}; expected 'transformer' or 'pooling'"
+    raise ValueError(msg)
+
+
 def main() -> None:
     set_seed(SEED)
 
@@ -113,13 +153,9 @@ def main() -> None:
     device = resolve_device(DEVICE)
     print(f"Using device: {device}")
 
-    model = MeanPoolingClassifier(
-        vocab_size=len(vocabulary),
-        num_classes=NUM_CLASSES,
-        embedding_dim=EMBEDDING_DIM,
-        pad_id=pad_id,
-    )
+    model = build_model(vocab_size=len(vocabulary), pad_id=pad_id)
     model.to(device)
+    print(f"Model: {MODEL}")
     optimizer = torch.optim.Adam(
         model.parameters(), lr=LEARNING_RATE, weight_decay=WEIGHT_DECAY
     )
