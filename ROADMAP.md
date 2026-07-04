@@ -68,8 +68,8 @@ These rules apply to every component (see also `CONTRIBUTING.md` and `docs/adr/`
 
 | Item | Status |
 |------|--------------------------|
-| Current Version | `v0.7.0` |
-| Development Stage | Experiment Tracking & Reproducibility (v0.8, upcoming) |
+| Current Version | `v0.8.0` |
+| Development Stage | Deployment & CLI (v0.9, upcoming) |
 | Overall Progress | 🚧 Active Development |
 
 > **Roadmap revised 2026-07-03.** The future phases below were restructured from
@@ -302,7 +302,7 @@ Reliable, reproducible measurement of model quality.
 
 ## v0.8.0 — Experiment Tracking & Reproducibility
 
-Status: ⏳ Planned
+Status: ✅ Completed
 
 **Goal**
 

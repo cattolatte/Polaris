@@ -1,6 +1,6 @@
 # Phase 08 — Experiment Tracking & Reproducibility
 
-**Status:** 🚧 In Progress
+**Status:** ✅ Completed
 
 ---
 
@@ -43,6 +43,14 @@ At the end of Phase 8 Polaris can:
 report, and environment; a config round-trips to/from a file; and the README has
 a **Results** section citing a number produced by a recorded run, with the config
 and seed to reproduce it.
+
+> **Benchmark result (honest).** On full IMDB (25k/25k, whitespace tokenization,
+> seed 0), the transformer and the mean-pooling baseline **tie at ~85.5%** test
+> accuracy — the transformer does **not** beat the baseline. Both hit the
+> tokenization ceiling; the transformer overfits more (higher test loss) at ~14×
+> the training cost. This confirms the v0.6 correction: the lever past ~85.5% is a
+> subword tokenizer (BPE), a data-representation change, not a bigger model.
+> Carried thread (2) is therefore *answered* (measured and explained), not "won."
 
 ---
 

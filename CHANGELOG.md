@@ -6,9 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ---
 
-## [Unreleased]
+## [v0.8.0] - 2026-07-04
 
-Work toward **v0.8.0 — Experiment Tracking & Reproducibility**. See `ROADMAP.md`.
+Experiment Tracking & Reproducibility. Config snapshots, environment capture, and
+a local run tracker make each run a reproducible artifact — and the README now
+carries a reproducible IMDB benchmark.
 
 ### Added
 
@@ -19,6 +21,7 @@ Work toward **v0.8.0 — Experiment Tracking & Reproducibility**. See `ROADMAP.m
 ### Changed
 
 - The IMDB example records each run (config, metrics, report, environment, seed) to `runs/imdb_<model>/` for reproducibility.
+- Added a reproducible **Benchmarks** section to the README (IMDB: transformer and baseline tie at ~85.5% test accuracy, capped by whitespace tokenization).
 
 ---
 
