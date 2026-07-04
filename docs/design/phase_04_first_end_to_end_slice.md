@@ -1,6 +1,6 @@
 # Phase 04 — First End-to-End Slice
 
-**Status:** 🚧 In Progress
+**Status:** ✅ Completed
 
 > The pivotal vertical slice. See [ADR-0002](../adr/0002-vertical-slice-architecture.md)
 > (vertical slices) and [ADR-0003](../adr/0003-tensor-framework.md) (PyTorch,

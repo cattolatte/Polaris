@@ -6,9 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ---
 
-## [Unreleased]
+## [v0.4.0] - 2026-07-04
 
-Work toward **v0.4.0 — First End-to-End Slice**. See `ROADMAP.md`.
+First End-to-End Slice. Polaris now runs a real NLP task end to end: from raw
+IMDB reviews to a trained sentiment classifier and a measured accuracy, using a
+from-scratch model on PyTorch with Apple Silicon (MPS) / CUDA / CPU support.
 
 ### Added
 

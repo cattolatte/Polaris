@@ -68,8 +68,8 @@ These rules apply to every component (see also `CONTRIBUTING.md` and `docs/adr/`
 
 | Item | Status |
 |------|--------------------------|
-| Current Version | `v0.3.0` |
-| Development Stage | First End-to-End Slice (v0.4, upcoming) |
+| Current Version | `v0.4.0` |
+| Development Stage | Transformer Encoder (v0.5, upcoming) |
 | Overall Progress | 🚧 Active Development |
 
 > **Roadmap revised 2026-07-03.** The future phases below were restructured from
@@ -185,7 +185,7 @@ first end-to-end pipeline.
 
 ## v0.4.0 — First End-to-End Slice ("Hello, IMDB")
 
-Status: ⏳ Planned — **the pivotal vertical slice**
+Status: ✅ Completed — **the pivotal vertical slice**
 
 **Goal**
 
