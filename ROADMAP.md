@@ -68,7 +68,7 @@ These rules apply to every component (see also `CONTRIBUTING.md` and `docs/adr/`
 
 | Item | Status |
 |------|--------------------------|
-| Current Version | `v0.4.0` |
+| Current Version | `v0.4.1` |
 | Development Stage | Transformer Encoder (v0.5, upcoming) |
 | Overall Progress | 🚧 Active Development |
 

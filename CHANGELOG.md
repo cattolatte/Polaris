@@ -6,6 +6,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ---
 
+## [v0.4.1] - 2026-07-04
+
+Richer evaluation and a regularized baseline, on top of the v0.4.0 slice.
+
+### Added
+
+- Classification metrics in `polaris.evaluation`: `predict` (gather logits and labels across batches), `confusion_matrix`, and per-class `precision_recall_f1`.
+
+### Changed
+
+- The IMDB example prints a per-class metrics table and a confusion matrix, and applies light regularization (a `min_frequency` cutoff when building the vocabulary and optimizer weight decay) to curb overfitting.
+
+---
+
 ## [v0.4.0] - 2026-07-04
 
 First End-to-End Slice. Polaris now runs a real NLP task end to end: from raw
