@@ -68,8 +68,8 @@ These rules apply to every component (see also `CONTRIBUTING.md` and `docs/adr/`
 
 | Item | Status |
 |------|--------------------------|
-| Current Version | `v0.8.0` |
-| Development Stage | Deployment & CLI (v0.9, upcoming) |
+| Current Version | `v0.9.0` |
+| Development Stage | Subword Tokenization / BPE (v0.9) |
 | Overall Progress | 🚧 Active Development |
 
 > **Roadmap revised 2026-07-03.** The future phases below were restructured from
@@ -324,7 +324,31 @@ Complete, reproducible experiment management.
 
 ---
 
-## v0.9.0 — Deployment & CLI
+## v0.9.0 — Subword Tokenization (BPE)
+
+Status: 🚧 In Progress
+
+**Goal**
+
+Break the tokenization ceiling found in the v0.8 benchmark (both models capped at
+~85.5%) by implementing **Byte Pair Encoding from scratch** — a subword tokenizer
+that splits rare/unseen words into known subwords instead of `<unk>`.
+
+**Major Components**
+
+- BPE training (learn ordered merges from a corpus)
+- `BPETokenizer` satisfying the existing `Tokenizer` contract (the second real
+  tokenizer, validating the v0.3 protocol)
+- A tokenizer switch in the example, and a **re-run benchmark** with BPE
+
+**Outcome**
+
+Better representation — not a bigger model — as the lever on accuracy, measured
+honestly against the whitespace baseline.
+
+---
+
+## v0.10.0 — Deployment & CLI
 
 Status: ⏳ Planned
 

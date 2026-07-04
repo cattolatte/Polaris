@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ---
 
+## [Unreleased]
+
+Work toward **v0.9.0 — Subword Tokenization (BPE)**. See `ROADMAP.md`.
+
+---
+
 ## [v0.8.0] - 2026-07-04
 
 Experiment Tracking & Reproducibility. Config snapshots, environment capture, and
