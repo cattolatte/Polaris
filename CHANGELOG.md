@@ -18,6 +18,10 @@ Work toward **v0.6.0 — Training Engine Maturity**. See `ROADMAP.md`.
 - `TrainingConfig` (`polaris.training`): a typed, validated Pydantic configuration for a run — Polaris' configuration system, introduced where first needed.
 - `Trainer` (`polaris.training`): a training engine composing warmup scheduling, a validation loop, early stopping, best-model checkpointing, and logging (with `TrainingResult` / `EpochRecord`).
 
+### Changed
+
+- The IMDB example trains through the `Trainer` — a validation split, warmup scheduling, early stopping, and best-model selection. Transformer defaults raised (10 epochs, learning rate 1e-3) now that warmup makes a higher rate safe.
+
 ---
 
 ## [v0.5.0] - 2026-07-04

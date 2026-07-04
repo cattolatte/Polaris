@@ -34,7 +34,7 @@ from polaris.evaluation import (
 )
 from polaris.models import MeanPoolingClassifier, TransformerEncoderClassifier
 from polaris.tokenizers import WhitespaceTokenizer, build_vocabulary
-from polaris.training import train
+from polaris.training import Trainer, TrainingConfig
 from polaris.utils import resolve_device, set_seed
 
 # --- Small, CPU-friendly defaults. Turn these up for a better model. ---
@@ -59,9 +59,14 @@ NUM_LAYERS = 2
 FF_DIM = 256
 DROPOUT = 0.1
 
-EPOCHS = 5
+EPOCHS = 10
 # Transformers prefer a smaller learning rate than the pooling baseline.
-LEARNING_RATE = 5e-4 if MODEL == "transformer" else 1e-2
+LEARNING_RATE = 1e-3 if MODEL == "transformer" else 1e-2
+
+# Training-engine settings (v0.6): validation split, warmup, early stopping.
+VAL_RATIO = 0.1  # fraction of the training set held out for validation
+WARMUP_RATIO = 0.1  # fraction of steps spent warming the learning rate up
+EARLY_STOPPING_PATIENCE = 3  # stop after N epochs without validation improvement
 
 # Regularization to curb overfitting (train loss collapses far below test loss).
 MIN_FREQUENCY = 2  # drop tokens seen only once — they tend to be memorized
@@ -147,7 +152,11 @@ def main() -> None:
     print(f"  vocabulary size: {len(vocabulary)}")
 
     tokenizer = WhitespaceTokenizer(vocabulary=vocabulary)
-    train_batches = make_batches(train_samples, tokenizer, pad_id=pad_id)
+
+    # Hold out part of the (already shuffled) training set for validation.
+    split = int(len(train_samples) * (1 - VAL_RATIO))
+    train_batches = make_batches(train_samples[:split], tokenizer, pad_id=pad_id)
+    val_batches = make_batches(train_samples[split:], tokenizer, pad_id=pad_id)
     test_batches = make_batches(test_samples, tokenizer, pad_id=pad_id)
 
     device = resolve_device(DEVICE)
@@ -156,14 +165,23 @@ def main() -> None:
     model = build_model(vocab_size=len(vocabulary), pad_id=pad_id)
     model.to(device)
     print(f"Model: {MODEL}")
+
+    config = TrainingConfig(
+        epochs=EPOCHS,
+        learning_rate=LEARNING_RATE,
+        warmup_ratio=WARMUP_RATIO,
+        weight_decay=WEIGHT_DECAY,
+        early_stopping_patience=EARLY_STOPPING_PATIENCE,
+    )
     optimizer = torch.optim.Adam(
-        model.parameters(), lr=LEARNING_RATE, weight_decay=WEIGHT_DECAY
+        model.parameters(),
+        lr=config.learning_rate,
+        weight_decay=config.weight_decay,
     )
 
-    print("Training...")
-    epoch_losses = train(model, train_batches, optimizer=optimizer, epochs=EPOCHS)
-    for epoch, loss in enumerate(epoch_losses, start=1):
-        print(f"  epoch {epoch}: train loss {loss:.4f}")
+    print("Training (warmup scheduling, validation, early stopping)...")
+    result = Trainer(model, optimizer, config).fit(train_batches, val_batches)
+    print(f"Best validation accuracy: {result.best_val_accuracy:.4f}")
 
     # --- Report ---
     test_loss, test_accuracy = evaluate(model, test_batches)
