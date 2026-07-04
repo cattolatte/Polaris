@@ -68,8 +68,8 @@ These rules apply to every component (see also `CONTRIBUTING.md` and `docs/adr/`
 
 | Item | Status |
 |------|--------------------------|
-| Current Version | `v0.5.0` |
-| Development Stage | Training Engine Maturity (v0.6, upcoming) |
+| Current Version | `v0.6.0` |
+| Development Stage | Evaluation Framework (v0.7, upcoming) |
 | Overall Progress | 🚧 Active Development |
 
 > **Roadmap revised 2026-07-03.** The future phases below were restructured from
@@ -250,7 +250,7 @@ artifact of Polaris.
 
 ## v0.6.0 — Training Engine Maturity
 
-Status: ⏳ Planned
+Status: ✅ Completed
 
 **Goal**
 

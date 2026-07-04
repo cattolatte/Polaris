@@ -6,9 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ---
 
-## [Unreleased]
+## [v0.6.0] - 2026-07-04
 
-Work toward **v0.6.0 — Training Engine Maturity**. See `ROADMAP.md`.
+Training Engine Maturity. A real `Trainer` — warmup scheduling, validation, early
+stopping, best-model checkpointing, and config-driven, logged runs — that fixes
+the transformer's underfitting. Configuration and logging arrive here, where the
+engine first needs them.
 
 ### Added
 

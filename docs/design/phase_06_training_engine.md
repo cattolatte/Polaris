@@ -1,6 +1,6 @@
 # Phase 06 — Training Engine Maturity
 
-**Status:** 🚧 In Progress
+**Status:** ✅ Completed
 
 > Where two deferred pieces finally arrive because a real component needs them:
 > the **configuration system** and **logging** (see `ROADMAP.md` and ADR-0004).
