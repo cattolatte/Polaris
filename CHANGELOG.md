@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ---
 
+## [Unreleased]
+
+Work toward **v0.8.0 — Experiment Tracking & Reproducibility**. See `ROADMAP.md`.
+
+---
+
 ## [v0.7.0] - 2026-07-04
 
 Evaluation Framework. The metric primitives become a structured, reusable
