@@ -15,6 +15,10 @@ Work toward **v0.7.0 — Evaluation Framework**. See `ROADMAP.md`.
 - `ClassificationReport` (`polaris.evaluation`): a structured report with per-class and macro/weighted-averaged precision, recall, and F1, plus support, accuracy, and the confusion matrix, with a readable `to_text()` rendering.
 - `classification_report(...)` builds a report from logits and labels; `evaluate_model(...)` is a harness that runs a model over batches and returns one — reusing the existing metric primitives.
 
+### Changed
+
+- The IMDB example prints a full `ClassificationReport` (per-class and averaged precision/recall/F1, support, accuracy, confusion matrix) instead of hand-assembling the metrics.
+
 ---
 
 ## [v0.6.0] - 2026-07-04

@@ -26,12 +26,7 @@ import torch
 from polaris.collation import Batch, collate
 from polaris.data import TextSample
 from polaris.data.datasets import IMDBDataset
-from polaris.evaluation import (
-    confusion_matrix,
-    evaluate,
-    precision_recall_f1,
-    predict,
-)
+from polaris.evaluation import evaluate, evaluate_model
 from polaris.models import MeanPoolingClassifier, TransformerEncoderClassifier
 from polaris.tokenizers import WhitespaceTokenizer, build_vocabulary
 from polaris.training import Trainer, TrainingConfig
@@ -184,29 +179,13 @@ def main() -> None:
     print(f"Best validation accuracy: {result.best_val_accuracy:.4f}")
 
     # --- Report ---
-    test_loss, test_accuracy = evaluate(model, test_batches)
-    logits, labels = predict(model, test_batches)
-    precisions, recalls, f1s = precision_recall_f1(
-        logits, labels, num_classes=NUM_CLASSES
+    test_loss, _ = evaluate(model, test_batches)
+    report = evaluate_model(
+        model, test_batches, num_classes=NUM_CLASSES, class_names=CLASS_NAMES
     )
-    matrix = confusion_matrix(logits, labels, num_classes=NUM_CLASSES)
 
-    print(f"\nTest loss:     {test_loss:.4f}")
-    print(f"Test accuracy: {test_accuracy:.4f}")
-
-    print("\nPer-class metrics:")
-    print(f"  {'class':<5} {'precision':>9} {'recall':>7} {'f1':>6}")
-    for index, name in enumerate(CLASS_NAMES):
-        print(
-            f"  {name:<5} {precisions[index]:>9.4f} "
-            f"{recalls[index]:>7.4f} {f1s[index]:>6.4f}"
-        )
-
-    print("\nConfusion matrix (rows = true, cols = predicted):")
-    print(f"  {'':<5} {'pred neg':>9} {'pred pos':>9}")
-    for index, name in enumerate(CLASS_NAMES):
-        row = matrix[index].tolist()
-        print(f"  {name:<5} {row[0]:>9} {row[1]:>9}")
+    print(f"\nTest loss: {test_loss:.4f}\n")
+    print(report.to_text())
 
 
 if __name__ == "__main__":
