@@ -6,9 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ---
 
-## [Unreleased]
+## [v0.7.0] - 2026-07-04
 
-Work toward **v0.7.0 — Evaluation Framework**. See `ROADMAP.md`.
+Evaluation Framework. The metric primitives become a structured, reusable
+`ClassificationReport` (per-class and averaged precision/recall/F1, support,
+accuracy, confusion matrix) with a readable rendering, plus an `evaluate_model`
+harness — the rigorous measurement layer a benchmark rests on.
 
 ### Added
 

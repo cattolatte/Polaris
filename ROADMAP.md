@@ -68,8 +68,8 @@ These rules apply to every component (see also `CONTRIBUTING.md` and `docs/adr/`
 
 | Item | Status |
 |------|--------------------------|
-| Current Version | `v0.6.0` |
-| Development Stage | Evaluation Framework (v0.7, upcoming) |
+| Current Version | `v0.7.0` |
+| Development Stage | Experiment Tracking & Reproducibility (v0.8, upcoming) |
 | Overall Progress | 🚧 Active Development |
 
 > **Roadmap revised 2026-07-03.** The future phases below were restructured from
@@ -280,7 +280,7 @@ now reproducible from config.
 
 ## v0.7.0 — Evaluation Framework
 
-Status: ⏳ Planned
+Status: ✅ Completed
 
 **Goal**
 
