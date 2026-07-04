@@ -29,7 +29,12 @@ from polaris.data.datasets import IMDBDataset
 from polaris.evaluation import evaluate, evaluate_model
 from polaris.experiments import capture_environment, record_run
 from polaris.models import MeanPoolingClassifier, TransformerEncoderClassifier
-from polaris.tokenizers import WhitespaceTokenizer, build_vocabulary
+from polaris.tokenizers import (
+    Tokenizer,
+    WhitespaceTokenizer,
+    build_vocabulary,
+    train_bpe,
+)
 from polaris.training import Trainer, TrainingConfig
 from polaris.utils import resolve_device, set_seed
 
@@ -45,6 +50,13 @@ BATCH_SIZE = 32
 
 # Which model to train: "transformer" (from scratch, v0.5) or "pooling" (v0.4).
 MODEL = "transformer"
+
+# Tokenizer: "bpe" (subword, v0.9) or "whitespace" (v0.3).
+# BPE splits rare/unseen words into subwords instead of <unk>. Its training is a
+# readable reference (not optimized), so on full data it takes a few minutes;
+# lower BPE_VOCAB_SIZE or raise MIN_FREQUENCY if it is too slow.
+TOKENIZER = "bpe"
+BPE_VOCAB_SIZE = 10_000
 
 EMBEDDING_DIM = 64  # mean-pooling baseline
 
@@ -86,9 +98,33 @@ def load_samples(split: str, limit: int) -> list[TextSample]:
     return [dataset[i] for i in indices[:limit]]
 
 
+def build_tokenizer(train_samples: Sequence[TextSample]) -> Tokenizer:
+    """Build the tokenizer selected by ``TOKENIZER`` from the training corpus."""
+    corpus = [sample.text.split() for sample in train_samples]
+    if TOKENIZER == "bpe":
+        return train_bpe(
+            corpus,
+            vocab_size=BPE_VOCAB_SIZE,
+            unk_token=UNK_TOKEN,
+            pad_token=PAD_TOKEN,
+            min_frequency=MIN_FREQUENCY,
+        )
+    if TOKENIZER == "whitespace":
+        vocabulary = build_vocabulary(
+            corpus,
+            unk_token=UNK_TOKEN,
+            pad_token=PAD_TOKEN,
+            min_frequency=MIN_FREQUENCY,
+            max_size=MAX_VOCAB,
+        )
+        return WhitespaceTokenizer(vocabulary=vocabulary)
+    msg = f"unknown TOKENIZER {TOKENIZER!r}; expected 'bpe' or 'whitespace'"
+    raise ValueError(msg)
+
+
 def make_batches(
     samples: Sequence[TextSample],
-    tokenizer: WhitespaceTokenizer,
+    tokenizer: Tokenizer,
     *,
     pad_id: int,
 ) -> list[Batch]:
@@ -134,20 +170,11 @@ def main() -> None:
     test_samples = load_samples("test", TEST_SAMPLES)
     print(f"  train samples: {len(train_samples)}, test samples: {len(test_samples)}")
 
-    print("Building vocabulary...")
-    tokenized_corpus = [sample.text.split() for sample in train_samples]
-    vocabulary = build_vocabulary(
-        tokenized_corpus,
-        unk_token=UNK_TOKEN,
-        pad_token=PAD_TOKEN,
-        min_frequency=MIN_FREQUENCY,
-        max_size=MAX_VOCAB,
-    )
-    pad_id = vocabulary.pad_id
+    print(f"Building tokenizer ({TOKENIZER})...")
+    tokenizer = build_tokenizer(train_samples)
+    pad_id = tokenizer.vocabulary.pad_id
     assert pad_id is not None  # guaranteed: we passed pad_token
-    print(f"  vocabulary size: {len(vocabulary)}")
-
-    tokenizer = WhitespaceTokenizer(vocabulary=vocabulary)
+    print(f"  vocabulary size: {len(tokenizer.vocabulary)}")
 
     # Hold out part of the (already shuffled) training set for validation.
     split = int(len(train_samples) * (1 - VAL_RATIO))
@@ -158,7 +185,7 @@ def main() -> None:
     device = resolve_device(DEVICE)
     print(f"Using device: {device}")
 
-    model = build_model(vocab_size=len(vocabulary), pad_id=pad_id)
+    model = build_model(vocab_size=len(tokenizer.vocabulary), pad_id=pad_id)
     model.to(device)
     print(f"Model: {MODEL}")
 
@@ -190,7 +217,7 @@ def main() -> None:
 
     # Record the run for reproducibility (config + metrics + report + environment).
     run_dir = record_run(
-        f"runs/imdb_{MODEL}",
+        f"runs/imdb_{MODEL}_{TOKENIZER}",
         config=config,
         history=result.history,
         report=report,

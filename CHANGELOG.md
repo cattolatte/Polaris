@@ -14,6 +14,10 @@ Work toward **v0.9.0 — Subword Tokenization (BPE)**. See `ROADMAP.md`.
 
 - From-scratch Byte Pair Encoding: `train_bpe` learns subword merges from a corpus, and `BPETokenizer` (the second concrete `Tokenizer`) tokenizes with them — splitting rare/unseen words into known subwords instead of `<unk>`.
 
+### Changed
+
+- The IMDB example has a `TOKENIZER` switch (`"bpe"` | `"whitespace"`) and records runs per model *and* tokenizer (`runs/imdb_<model>_<tokenizer>/`).
+
 ---
 
 ## [v0.8.0] - 2026-07-04
