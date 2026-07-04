@@ -18,6 +18,7 @@ import torch
 from torch import nn
 
 from polaris.collation.batch import Batch
+from polaris.utils.device import module_device
 
 __all__ = ["train"]
 
@@ -64,6 +65,10 @@ def train(
         raise ValueError(msg)
 
     criterion = loss_fn if loss_fn is not None else nn.CrossEntropyLoss()
+
+    # Move the batches to wherever the model lives (CPU / MPS / CUDA), once.
+    device = module_device(model)
+    batches = [batch.to(device) for batch in batches]
 
     model.train()
     epoch_losses: list[float] = []

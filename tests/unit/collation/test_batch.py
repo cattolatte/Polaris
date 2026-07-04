@@ -80,3 +80,25 @@ def test_fields_cannot_be_reassigned() -> None:
 
     with pytest.raises(dataclasses.FrozenInstanceError):
         batch.input_ids = torch.zeros((1, 1), dtype=torch.long)  # type: ignore[misc]
+
+
+# ---------------------------------------------------------------------------
+# Device movement
+# ---------------------------------------------------------------------------
+
+
+def test_to_returns_batch_on_target_device() -> None:
+    """``to`` returns a new batch with tensors on the requested device."""
+    batch = Batch(
+        input_ids=torch.tensor([[1, 2]]),
+        attention_mask=torch.tensor([[1, 1]]),
+        labels=torch.tensor([0]),
+    )
+
+    moved = batch.to("cpu")
+
+    assert isinstance(moved, Batch)
+    assert moved.input_ids.device.type == "cpu"
+    assert moved.attention_mask.device.type == "cpu"
+    assert moved.labels.device.type == "cpu"
+    assert torch.equal(moved.input_ids, batch.input_ids)

@@ -14,6 +14,7 @@ import torch
 from torch import nn
 
 from polaris.collation.batch import Batch
+from polaris.utils.device import module_device
 
 __all__ = ["accuracy", "evaluate"]
 
@@ -85,6 +86,9 @@ def evaluate(
         raise ValueError(msg)
 
     criterion = loss_fn if loss_fn is not None else nn.CrossEntropyLoss()
+
+    device = module_device(model)
+    batches = [batch.to(device) for batch in batches]
 
     model.eval()
     total_loss = 0.0

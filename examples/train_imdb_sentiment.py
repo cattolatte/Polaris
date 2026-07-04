@@ -28,10 +28,12 @@ from polaris.evaluation import evaluate
 from polaris.models import MeanPoolingClassifier
 from polaris.tokenizers import WhitespaceTokenizer, build_vocabulary
 from polaris.training import train
-from polaris.utils import set_seed
+from polaris.utils import resolve_device, set_seed
 
 # --- Small, CPU-friendly defaults. Turn these up for a better model. ---
 SEED = 0
+# None => auto-select (Apple Silicon MPS, else CUDA, else CPU). Set to "cpu" to force.
+DEVICE: str | None = None
 TRAIN_SAMPLES = 5000
 TEST_SAMPLES = 5000
 MAX_VOCAB = 20_000
@@ -97,12 +99,16 @@ def main() -> None:
     train_batches = make_batches(train_samples, tokenizer, pad_id=pad_id)
     test_batches = make_batches(test_samples, tokenizer, pad_id=pad_id)
 
+    device = resolve_device(DEVICE)
+    print(f"Using device: {device}")
+
     model = MeanPoolingClassifier(
         vocab_size=len(vocabulary),
         num_classes=NUM_CLASSES,
         embedding_dim=EMBEDDING_DIM,
         pad_id=pad_id,
     )
+    model.to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
 
     print("Training...")

@@ -16,6 +16,7 @@ Work toward **v0.4.0 — First End-to-End Slice**. See `ROADMAP.md`.
 - `MeanPoolingClassifier` (`polaris.models`): the first from-scratch model — embedding, mask-aware mean pooling, and a linear classification head.
 - A minimal training loop (`polaris.training.train`) and basic metrics (`polaris.evaluation.accuracy` / `evaluate`).
 - Deterministic seeding (`polaris.utils.set_seed`).
+- Device selection (`polaris.utils.resolve_device`) preferring Apple Silicon MPS, then CUDA, then CPU, plus `Batch.to`. Training and evaluation move batches to the model's device automatically, and the example uses the best available device.
 - A thin `polaris` command-line interface with an `info` command.
 - `examples/train_imdb_sentiment.py`: a complete, runnable end-to-end sentiment-training script on IMDB.
 - An offline end-to-end integration test that exercises the full pipeline without downloading a dataset.

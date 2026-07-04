@@ -77,3 +77,22 @@ class Batch:
             The batch size (number of rows).
         """
         return int(self.input_ids.shape[0])
+
+    def to(self, device: torch.device | str) -> Batch:
+        """Return a copy of this batch with all tensors moved to ``device``.
+
+        Parameters
+        ----------
+        device : torch.device or str
+            The target device (e.g. ``"cpu"``, ``"mps"``, ``"cuda"``).
+
+        Returns
+        -------
+        Batch
+            A new batch whose tensors live on ``device``.
+        """
+        return Batch(
+            input_ids=self.input_ids.to(device),
+            attention_mask=self.attention_mask.to(device),
+            labels=self.labels.to(device),
+        )
