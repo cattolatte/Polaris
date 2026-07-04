@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ---
 
+## [Unreleased]
+
+Work toward **v0.5.0 — Transformer Encoder (from scratch)**. See `ROADMAP.md`.
+
+---
+
 ## [v0.4.1] - 2026-07-04
 
 Richer evaluation and a regularized baseline, on top of the v0.4.0 slice.
