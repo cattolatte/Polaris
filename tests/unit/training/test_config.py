@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import pytest
 from pydantic import ValidationError
 
@@ -44,3 +46,14 @@ def test_out_of_range_warmup_ratio_is_rejected() -> None:
     """The warmup ratio must lie in [0, 1]."""
     with pytest.raises(ValidationError):
         TrainingConfig(warmup_ratio=1.5)
+
+
+def test_round_trips_to_and_from_a_file(tmp_path: Path) -> None:
+    """A config snapshot written to disk loads back equal."""
+    config = TrainingConfig(epochs=7, learning_rate=5e-4, early_stopping_patience=2)
+    path = tmp_path / "config.json"
+
+    config.to_file(path)
+    loaded = TrainingConfig.from_file(path)
+
+    assert loaded == config

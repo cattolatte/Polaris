@@ -8,6 +8,8 @@ system first appears — introduced because the training engine genuinely needs 
 
 from __future__ import annotations
 
+from pathlib import Path
+
 from pydantic import BaseModel, Field
 
 __all__ = ["TrainingConfig"]
@@ -39,3 +41,12 @@ class TrainingConfig(BaseModel):
     weight_decay: float = Field(default=0.0, ge=0.0)
     early_stopping_patience: int | None = Field(default=None, ge=1)
     checkpoint_path: str | None = None
+
+    def to_file(self, path: str | Path) -> None:
+        """Write the config to a JSON file (a config snapshot)."""
+        Path(path).write_text(self.model_dump_json(indent=2))
+
+    @classmethod
+    def from_file(cls, path: str | Path) -> TrainingConfig:
+        """Load a config from a JSON file written by :meth:`to_file`."""
+        return cls.model_validate_json(Path(path).read_text())

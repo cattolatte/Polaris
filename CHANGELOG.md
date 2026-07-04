@@ -10,6 +10,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 Work toward **v0.8.0 — Experiment Tracking & Reproducibility**. See `ROADMAP.md`.
 
+### Added
+
+- Config snapshots: `TrainingConfig.to_file` / `TrainingConfig.from_file` (JSON).
+- `capture_environment` (`polaris.experiments`): records the Polaris, Python, PyTorch, and platform versions for reproducibility.
+- A local experiment tracker (`polaris.experiments`): `record_run` writes a run's config, metric history, classification report, and environment to a directory; `load_run` reads them back into a `RunData`.
+
 ---
 
 ## [v0.7.0] - 2026-07-04
