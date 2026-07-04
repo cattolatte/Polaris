@@ -34,9 +34,18 @@ At the end of Phase 6 Polaris can:
 - drive a run from a **typed configuration** rather than edited constants
 - **log** per-epoch metrics through a standard logger
 
-**Proof of done:** the transformer, trained via the `Trainer` with warmup
-scheduling and best-checkpointing, beats the v0.4 baseline — and the run is
-defined by a config object, not code edits.
+**Proof of done:** the transformer trains via the `Trainer` — warmup scheduling,
+validation, early stopping, best-checkpointing — with the run defined by a config
+object rather than code edits.
+
+> **Post-release correction.** An earlier version of this proof of done claimed
+> the transformer "beats the v0.4 baseline." That was over-stated: it conflated
+> *the engine working* (delivered here) with *the model winning*, which depends on
+> data scale and tokenization, not the engine. On the small default (5k samples,
+> whitespace tokenization) the transformer does **not** beat the bag-of-embeddings
+> baseline — an expected result (transformers are data-hungry). Demonstrating the
+> transformer overtaking the baseline with a reproducible, full-data run is
+> deferred to the **v0.8 benchmark** (see `docs/design/phase_08_*`).
 
 ---
 
@@ -58,8 +67,9 @@ defined by a config object, not code edits.
   early-stopping counter) and it has a consumer (the example / CLI). The minimal
   `train()` function stays for the simple case and the learning-behaviour tests.
 - **Configuration — a concrete `TrainingConfig`, not a framework.** A typed
-  Pydantic model of the hyperparameters, loadable from a file. It grows fields
-  when a run needs them — no generic config engine.
+  Pydantic model of the hyperparameters. It grows fields when a run needs them —
+  no generic config engine. (Loading/saving a config **from a file** is deferred
+  to v0.8, where config *snapshots* are the point.)
 - **Callbacks — deferred.** No consumer needs a generic hook yet; extracting a
   `Callback` protocol now would be a speculative dead abstraction (ADR-0005).
 - **Scheduler — from scratch.** A small warmup-then-decay schedule, because
@@ -107,8 +117,8 @@ tests/
    standard-library logger. The first concrete home for logging.
 4. **`TrainingConfig`** (`config.py`) — a Pydantic model of the run
    hyperparameters (epochs, LR, warmup, batch size, early-stopping patience, …),
-   with validation and defaults; constructable from a dict / file. Tested:
-   validation and defaults.
+   with validation and defaults; constructable from a dict (file load/save is a
+   v0.8 concern). Tested: validation and defaults.
 5. **`Trainer`** (`trainer.py`) — composes model, optimizer, schedule,
    checkpointing, and logging; runs train + validation epochs, applies early
    stopping, and keeps the best model by validation metric. Tested on tiny
