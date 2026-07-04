@@ -68,8 +68,8 @@ These rules apply to every component (see also `CONTRIBUTING.md` and `docs/adr/`
 
 | Item | Status |
 |------|--------------------------|
-| Current Version | `v0.4.1` |
-| Development Stage | Transformer Encoder (v0.5, upcoming) |
+| Current Version | `v0.5.0` |
+| Development Stage | Training Engine Maturity (v0.6, upcoming) |
 | Overall Progress | 🚧 Active Development |
 
 > **Roadmap revised 2026-07-03.** The future phases below were restructured from
@@ -224,7 +224,7 @@ proven pipeline.
 
 ## v0.5.0 — Transformer Encoder (from scratch)
 
-Status: ⏳ Planned
+Status: ✅ Completed
 
 **Goal**
 

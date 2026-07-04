@@ -6,15 +6,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ---
 
-## [Unreleased]
+## [v0.5.0] - 2026-07-04
 
-Work toward **v0.5.0 — Transformer Encoder (from scratch)**. See `ROADMAP.md`.
+Transformer Encoder (from scratch). Polaris' educational centerpiece: a
+transformer implemented on tensor primitives, trained through the unchanged v0.4
+pipeline.
 
 ### Added
 
 - From-scratch attention (`polaris.models.attention`): `scaled_dot_product_attention` and `MultiHeadSelfAttention`.
 - From-scratch transformer building blocks (`polaris.models.transformer`): `LayerNorm`, `SinusoidalPositionalEncoding`, and a pre-norm `TransformerEncoderBlock`.
 - `TransformerEncoderClassifier` (`polaris.models`) — a transformer text classifier that reuses the v0.4 collation, training, and evaluation unchanged.
+
+### Changed
+
+- The IMDB example trains either the transformer (default) or the pooling baseline via a `MODEL` switch, reusing the same data, collation, training, and evaluation code.
+
+### Notes
+
+- The `Model` abstraction is deliberately **deferred**: two models now exist, but no consumer needs a Polaris-specific protocol (they share the `nn.Module` contract). Extracting one now would be a speculative dead abstraction — see the Phase 05 design doc.
 
 ---
 

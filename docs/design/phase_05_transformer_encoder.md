@@ -1,6 +1,6 @@
 # Phase 05 — Transformer Encoder (from scratch)
 
-**Status:** 🚧 In Progress
+**Status:** ✅ Completed
 
 > The educational centerpiece. See [ADR-0003](../adr/0003-tensor-framework.md)
 > (model internals from scratch) and [ADR-0004](../adr/0004-abstraction-policy.md)
