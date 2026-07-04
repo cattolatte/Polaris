@@ -53,6 +53,10 @@ datasets = [
     "datasets>=4.0.0",
 ]
 
+torch = [
+    "torch>=2.2.0",
+]
+
 [project.urls]
 Homepage = "https://github.com/cattolatte/Polaris"
 Repository = "https://github.com/cattolatte/Polaris"
@@ -136,6 +140,22 @@ source = ["polaris"]
 show_missing = true
 skip_covered = false
 fail_under = 90
+
+# ============================================================
+# uv — dependency sources
+# ============================================================
+
+# Install the CPU-only PyTorch build on Linux (e.g. CI) to avoid pulling the
+# large CUDA wheels. macOS and Windows use the default PyPI wheels.
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[tool.uv.sources]
+torch = [
+    { index = "pytorch-cpu", marker = "sys_platform == 'linux'" },
+]
 
 [tool.hatch.build.targets.sdist]
 include = [
