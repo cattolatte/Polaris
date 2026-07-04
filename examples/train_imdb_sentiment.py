@@ -27,6 +27,7 @@ from polaris.collation import Batch, collate
 from polaris.data import TextSample
 from polaris.data.datasets import IMDBDataset
 from polaris.evaluation import evaluate, evaluate_model
+from polaris.experiments import capture_environment, record_run
 from polaris.models import MeanPoolingClassifier, TransformerEncoderClassifier
 from polaris.tokenizers import WhitespaceTokenizer, build_vocabulary
 from polaris.training import Trainer, TrainingConfig
@@ -186,6 +187,17 @@ def main() -> None:
 
     print(f"\nTest loss: {test_loss:.4f}\n")
     print(report.to_text())
+
+    # Record the run for reproducibility (config + metrics + report + environment).
+    run_dir = record_run(
+        f"runs/imdb_{MODEL}",
+        config=config,
+        history=result.history,
+        report=report,
+        environment=capture_environment(),
+        seed=SEED,
+    )
+    print(f"\nRun recorded to: {run_dir}")
 
 
 if __name__ == "__main__":
