@@ -10,6 +10,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 Work toward **v0.4.0 — First End-to-End Slice**. See `ROADMAP.md`.
 
+### Added
+
+- Collation layer (`polaris.collation`): `Batch` and `collate`, turning tokenizer output into padded, model-ready PyTorch tensors with an attention mask.
+- `MeanPoolingClassifier` (`polaris.models`): the first from-scratch model — embedding, mask-aware mean pooling, and a linear classification head.
+- A minimal training loop (`polaris.training.train`) and basic metrics (`polaris.evaluation.accuracy` / `evaluate`).
+- Deterministic seeding (`polaris.utils.set_seed`).
+- A thin `polaris` command-line interface with an `info` command.
+- `examples/train_imdb_sentiment.py`: a complete, runnable end-to-end sentiment-training script on IMDB.
+- An offline end-to-end integration test that exercises the full pipeline without downloading a dataset.
+- PyTorch as an optional `torch` extra, resolved to CPU-only wheels on Linux.
+
+### Changed
+
+- CI installs the `torch` extra so the collation/model/training tests run.
+
 ---
 
 ## [v0.3.0] - 2026-07-03

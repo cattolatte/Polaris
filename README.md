@@ -66,15 +66,16 @@ The platform is organized into dedicated modules with clearly defined responsibi
 | `registry/` | A mechanism for registering and accessing components by name. Implemented and tested, but currently **dormant** — no consumers yet (see [ADR-0005](docs/adr/0005-registry-dormant.md)). | 🧊 Dormant |
 | `data/` | Handles data loading and management, exposing datasets through a Polaris-native interface. | ✅ Implemented |
 | `tokenizers/` | A laboratory for building and using various tokenization strategies. | ✅ Implemented |
-| `models/` | Provides reusable abstractions and implementations of modern NLP architectures. | 🏗️ Planned |
-| `training/` | The core training engine, orchestrating training loops, checkpointing, and optimization. | 🏗️ Planned |
+| `collation/` | Turns tokenizer output into padded, model-ready tensor batches. | ✅ Implemented |
+| `models/` | From-scratch implementations of NLP architectures on PyTorch primitives. | ✅ Implemented |
+| `training/` | The training engine — training loops now; checkpointing and schedulers later. | ✅ Implemented |
 | `experiments/` | Manages experiment tracking, logging, and versioning of results. | 🏗️ Planned |
-| `evaluation/` | Provides tools and metrics for comprehensive model evaluation. | 🏗️ Planned |
+| `evaluation/` | Tools and metrics for model evaluation. | ✅ Implemented |
 | `inference/` | Runtime for running predictions with trained models. | 🏗️ Planned |
 | `deployment/` | Contains utilities for packaging, optimizing, and deploying models for inference. | 🏗️ Planned |
 | `visualization/` | Tools for visualizing data, model architectures, and experiment results. | 🏗️ Planned |
 | `plugins/` | An extensible plugin system for integrating third-party tools and custom functionality. | 🏗️ Planned |
-| `utils/` | A collection of common utilities and helper functions used across the framework. | 🏗️ Planned |
+| `utils/` | Common utilities (e.g. reproducible seeding) used across the framework. | ✅ Implemented |
 
 ---
 
