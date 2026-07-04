@@ -24,7 +24,12 @@ import torch
 from polaris.collation import Batch, collate
 from polaris.data import TextSample
 from polaris.data.datasets import IMDBDataset
-from polaris.evaluation import evaluate
+from polaris.evaluation import (
+    confusion_matrix,
+    evaluate,
+    precision_recall_f1,
+    predict,
+)
 from polaris.models import MeanPoolingClassifier
 from polaris.tokenizers import WhitespaceTokenizer, build_vocabulary
 from polaris.training import train
@@ -43,9 +48,14 @@ EMBEDDING_DIM = 64
 EPOCHS = 5
 LEARNING_RATE = 1e-2
 
+# Regularization to curb overfitting (train loss collapses far below test loss).
+MIN_FREQUENCY = 2  # drop tokens seen only once — they tend to be memorized
+WEIGHT_DECAY = 1e-4  # L2 penalty via the optimizer
+
 PAD_TOKEN = "<pad>"
 UNK_TOKEN = "<unk>"
 NUM_CLASSES = 2
+CLASS_NAMES = ("neg", "pos")
 
 
 def load_samples(split: str, limit: int) -> list[TextSample]:
@@ -89,6 +99,7 @@ def main() -> None:
         tokenized_corpus,
         unk_token=UNK_TOKEN,
         pad_token=PAD_TOKEN,
+        min_frequency=MIN_FREQUENCY,
         max_size=MAX_VOCAB,
     )
     pad_id = vocabulary.pad_id
@@ -109,16 +120,39 @@ def main() -> None:
         pad_id=pad_id,
     )
     model.to(device)
-    optimizer = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE)
+    optimizer = torch.optim.Adam(
+        model.parameters(), lr=LEARNING_RATE, weight_decay=WEIGHT_DECAY
+    )
 
     print("Training...")
     epoch_losses = train(model, train_batches, optimizer=optimizer, epochs=EPOCHS)
     for epoch, loss in enumerate(epoch_losses, start=1):
         print(f"  epoch {epoch}: train loss {loss:.4f}")
 
+    # --- Report ---
     test_loss, test_accuracy = evaluate(model, test_batches)
-    print(f"\nTest loss: {test_loss:.4f}")
+    logits, labels = predict(model, test_batches)
+    precisions, recalls, f1s = precision_recall_f1(
+        logits, labels, num_classes=NUM_CLASSES
+    )
+    matrix = confusion_matrix(logits, labels, num_classes=NUM_CLASSES)
+
+    print(f"\nTest loss:     {test_loss:.4f}")
     print(f"Test accuracy: {test_accuracy:.4f}")
+
+    print("\nPer-class metrics:")
+    print(f"  {'class':<5} {'precision':>9} {'recall':>7} {'f1':>6}")
+    for index, name in enumerate(CLASS_NAMES):
+        print(
+            f"  {name:<5} {precisions[index]:>9.4f} "
+            f"{recalls[index]:>7.4f} {f1s[index]:>6.4f}"
+        )
+
+    print("\nConfusion matrix (rows = true, cols = predicted):")
+    print(f"  {'':<5} {'pred neg':>9} {'pred pos':>9}")
+    for index, name in enumerate(CLASS_NAMES):
+        row = matrix[index].tolist()
+        print(f"  {name:<5} {row[0]:>9} {row[1]:>9}")
 
 
 if __name__ == "__main__":

@@ -11,7 +11,13 @@ import pytest
 import torch
 
 from polaris.collation.collator import collate
-from polaris.evaluation.metrics import accuracy, evaluate
+from polaris.evaluation.metrics import (
+    accuracy,
+    confusion_matrix,
+    evaluate,
+    precision_recall_f1,
+    predict,
+)
 from polaris.models.pooling_classifier import MeanPoolingClassifier
 from polaris.tokenizers.encoding import Encoding
 
@@ -87,3 +93,65 @@ def test_evaluate_empty_raises() -> None:
 
     with pytest.raises(ValueError, match="empty"):
         evaluate(model, [])
+
+
+# ---------------------------------------------------------------------------
+# predict
+# ---------------------------------------------------------------------------
+
+
+def test_predict_concatenates_logits_and_labels() -> None:
+    """``predict`` gathers logits and labels across batches, in order."""
+    model = MeanPoolingClassifier(
+        vocab_size=5, num_classes=2, embedding_dim=8, pad_id=0
+    )
+    first = collate([(_encoding([1, 2]), 0)], pad_id=0)
+    second = collate([(_encoding([3]), 1), (_encoding([4]), 0)], pad_id=0)
+
+    logits, labels = predict(model, [first, second])
+
+    assert logits.shape == (3, 2)
+    assert labels.tolist() == [0, 1, 0]
+
+
+def test_predict_empty_raises() -> None:
+    """Predicting over no batches is rejected."""
+    model = MeanPoolingClassifier(vocab_size=5, num_classes=2)
+
+    with pytest.raises(ValueError, match="empty"):
+        predict(model, [])
+
+
+# ---------------------------------------------------------------------------
+# confusion_matrix
+# ---------------------------------------------------------------------------
+
+
+def test_confusion_matrix_counts_true_vs_predicted() -> None:
+    """Rows are true classes; columns are predicted classes."""
+    # argmax -> [0, 0, 1, 1]; labels -> [0, 1, 1, 1]
+    logits = torch.tensor([[2.0, 1.0], [2.0, 1.0], [1.0, 2.0], [1.0, 2.0]])
+    labels = torch.tensor([0, 1, 1, 1])
+
+    matrix = confusion_matrix(logits, labels, num_classes=2)
+
+    assert matrix.tolist() == [[1, 0], [1, 2]]
+
+
+# ---------------------------------------------------------------------------
+# precision_recall_f1
+# ---------------------------------------------------------------------------
+
+
+def test_precision_recall_f1_per_class() -> None:
+    """Per-class precision, recall, and F1 match a hand-computed case."""
+    logits = torch.tensor([[2.0, 1.0], [2.0, 1.0], [1.0, 2.0], [1.0, 2.0]])
+    labels = torch.tensor([0, 1, 1, 1])
+
+    precisions, recalls, f1s = precision_recall_f1(logits, labels, num_classes=2)
+
+    assert precisions[0] == pytest.approx(0.5)
+    assert recalls[0] == pytest.approx(1.0)
+    assert precisions[1] == pytest.approx(1.0)
+    assert recalls[1] == pytest.approx(2 / 3)
+    assert f1s[1] == pytest.approx(2 * 1.0 * (2 / 3) / (1.0 + 2 / 3))
