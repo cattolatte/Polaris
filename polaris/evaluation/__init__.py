@@ -11,11 +11,19 @@ from polaris.evaluation.metrics import (
     precision_recall_f1,
     predict,
 )
+from polaris.evaluation.report import (
+    ClassificationReport,
+    classification_report,
+    evaluate_model,
+)
 
 __all__ = [
+    "ClassificationReport",
     "accuracy",
+    "classification_report",
     "confusion_matrix",
     "evaluate",
+    "evaluate_model",
     "precision_recall_f1",
     "predict",
 ]

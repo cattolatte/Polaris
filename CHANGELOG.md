@@ -10,6 +10,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 Work toward **v0.7.0 — Evaluation Framework**. See `ROADMAP.md`.
 
+### Added
+
+- `ClassificationReport` (`polaris.evaluation`): a structured report with per-class and macro/weighted-averaged precision, recall, and F1, plus support, accuracy, and the confusion matrix, with a readable `to_text()` rendering.
+- `classification_report(...)` builds a report from logits and labels; `evaluate_model(...)` is a harness that runs a model over batches and returns one — reusing the existing metric primitives.
+
 ---
 
 ## [v0.6.0] - 2026-07-04
