@@ -15,6 +15,8 @@ Work toward **v0.6.0 — Training Engine Maturity**. See `ROADMAP.md`.
 - `WarmupSchedule` (`polaris.training`): a from-scratch learning-rate schedule with linear warmup then cosine/linear decay — the ingredient the transformer needs to train well.
 - Checkpointing (`polaris.training.save_checkpoint` / `load_checkpoint`): save and restore model + optimizer state with metadata.
 - `get_logger` (`polaris.utils`): a standard-library logger for the training engine.
+- `TrainingConfig` (`polaris.training`): a typed, validated Pydantic configuration for a run — Polaris' configuration system, introduced where first needed.
+- `Trainer` (`polaris.training`): a training engine composing warmup scheduling, a validation loop, early stopping, best-model checkpointing, and logging (with `TrainingResult` / `EpochRecord`).
 
 ---
 
