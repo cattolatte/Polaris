@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ---
 
+## [Unreleased]
+
+Work toward **v0.7.0 — Evaluation Framework**. See `ROADMAP.md`.
+
+---
+
 ## [v0.6.0] - 2026-07-04
 
 Training Engine Maturity. A real `Trainer` — warmup scheduling, validation, early
