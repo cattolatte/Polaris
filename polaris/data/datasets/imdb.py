@@ -78,8 +78,10 @@ class IMDBDataset(Dataset):
         self._split: DatasetSplit = split
 
         try:
+            # Canonical Hugging Face repo id. Newer datasets/huggingface_hub
+            # require the "namespace/name" form and reject the bare "imdb".
             self._data: HFDataset = load_dataset(
-                "imdb",
+                "stanfordnlp/imdb",
                 split=split,
             )
         except Exception as exc:

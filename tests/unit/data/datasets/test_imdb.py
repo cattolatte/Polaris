@@ -80,7 +80,7 @@ def test_backend_receives_expected_arguments() -> None:
     with patch(_LOAD_DATASET, return_value=FakeHFDataset(_ROWS)) as mock_load:
         IMDBDataset(split="test")
 
-    mock_load.assert_called_once_with("imdb", split="test")
+    mock_load.assert_called_once_with("stanfordnlp/imdb", split="test")
 
 
 def test_invalid_split_raises_invalid_split_error() -> None:

@@ -26,6 +26,10 @@ Work toward **v0.4.0 — First End-to-End Slice**. See `ROADMAP.md`.
 
 - CI installs the `torch` extra so the collation/model/training tests run.
 
+### Fixed
+
+- `IMDBDataset` loads the canonical `stanfordnlp/imdb` Hugging Face repo id; the bare `imdb` id is rejected by newer `datasets`/`huggingface_hub` versions.
+
 ---
 
 ## [v0.3.0] - 2026-07-03
