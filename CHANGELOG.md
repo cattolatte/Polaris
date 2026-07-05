@@ -6,9 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ---
 
-## [Unreleased]
+## [v0.9.0] - 2026-07-05
 
-Work toward **v0.9.0 — Subword Tokenization (BPE)**. See `ROADMAP.md`.
+Subword Tokenization. A from-scratch Byte Pair Encoding tokenizer (`train_bpe` +
+`BPETokenizer`), the second real tokenizer. The re-run benchmark honestly shows
+BPE slightly *hurts* on IMDB — the ceiling is the model class (no pretraining),
+not the tokenization.
 
 ### Added
 

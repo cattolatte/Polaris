@@ -69,7 +69,7 @@ These rules apply to every component (see also `CONTRIBUTING.md` and `docs/adr/`
 | Item | Status |
 |------|--------------------------|
 | Current Version | `v0.9.0` |
-| Development Stage | Subword Tokenization / BPE (v0.9) |
+| Development Stage | Pretrained Embeddings (v0.10, upcoming) |
 | Overall Progress | 🚧 Active Development |
 
 > **Roadmap revised 2026-07-03.** The future phases below were restructured from
@@ -326,7 +326,7 @@ Complete, reproducible experiment management.
 
 ## v0.9.0 — Subword Tokenization (BPE)
 
-Status: 🚧 In Progress
+Status: ✅ Completed
 
 **Goal**
 

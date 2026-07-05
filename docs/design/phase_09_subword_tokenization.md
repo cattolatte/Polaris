@@ -1,6 +1,6 @@
 # Phase 09 — Subword Tokenization (BPE)
 
-**Status:** 🚧 In Progress
+**Status:** ✅ Completed
 
 ---
 
@@ -33,6 +33,16 @@ At the end of Phase 9 Polaris can:
 **Proof of done:** BPE trains and tokenizes with far fewer `<unk>` than
 whitespace; `BPETokenizer` satisfies the `Tokenizer` contract; the example trains
 on BPE tokens; and the README benchmark is re-run with BPE (new, honest numbers).
+
+> **Benchmark result (honest).** BPE at 10k merges **slightly hurt** on IMDB:
+> ~0.838 vs ~0.855 (transformer) and ~0.839 vs ~0.856 (baseline). IMDB sentiment
+> lives in common whole words, which BPE fragments (diluting the signal and losing
+> more to truncation) — subwording pays off for out-of-vocabulary / morphology,
+> not this task. This *disproved* the v0.8 hypothesis that tokenization was the
+> ceiling: the real ceiling is the model class (from-scratch, no pretraining,
+> ~85–86%). The lever is pretrained representations — deferred to v0.10. BPE
+> remains a correct, valuable tokenizer; the benchmark honestly shows *when* it
+> helps.
 
 ---
 

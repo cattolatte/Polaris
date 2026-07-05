@@ -7,7 +7,7 @@
 *Build. Train. Evaluate. Deploy.*
 
 [![Status](https://img.shields.io/badge/status-under%20development-orange)](https://github.com/cattolatte/Polaris)
-[![Version](https://img.shields.io/badge/version-v0.8.0-blue)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-v0.9.0-blue)](CHANGELOG.md)
 [![Python](https://img.shields.io/badge/python-3.12+-blue)](https://www.python.org)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
@@ -89,28 +89,37 @@ Polaris is being built incrementally, with a focus on quality and architectural 
 
 ## Benchmarks
 
-Polaris trains end to end on IMDB sentiment classification. Both models below are
-implemented **from scratch** and trained through the same pipeline (data →
-tokenization → collation → model → training engine → evaluation). Runs are
-recorded and reproducible.
+Polaris trains end to end on IMDB sentiment classification. Every model *and*
+tokenizer below is implemented **from scratch** and trained through the same
+pipeline (data → tokenization → collation → model → training engine →
+evaluation). Runs are recorded and reproducible.
 
-| Model | Test accuracy | Macro F1 | Test loss |
-| :--- | :---: | :---: | :---: |
-| Mean-pooling baseline (embedding → mean-pool → linear) | **0.856** | 0.856 | 0.340 |
-| Transformer encoder (2 layers, 128-dim, 4 heads) | 0.855 | 0.855 | 0.414 |
+| Model | Whitespace (20k) | BPE (10k) |
+| :--- | :---: | :---: |
+| Mean-pooling baseline | **0.856** | 0.839 |
+| Transformer encoder (from scratch) | 0.855 | 0.838 |
 
-<sub>IMDB, 25,000 train / 25,000 test · whitespace tokenization (20k vocab) · seed 0
-· Apple Silicon (MPS). Reproduce with `examples/train_imdb_sentiment.py`
-(`TRAIN_SAMPLES = TEST_SAMPLES = 25000`).</sub>
+<sub>Test accuracy on IMDB · 25,000 train / 25,000 test · seed 0 · Apple Silicon
+(MPS). Reproduce with `examples/train_imdb_sentiment.py` (`TRAIN_SAMPLES =
+TEST_SAMPLES = 25000`, plus the `MODEL` / `TOKENIZER` switches).</sub>
 
-**What this shows.** The two models tie at **~85.5%** — and that tie *is* the
-result. At this scale, accuracy is capped by the **tokenization**, not the model:
-whitespace splitting produces a large, sparse vocabulary with many
-out-of-vocabulary tokens, so both models hit the same ceiling. The transformer's
-extra capacity is spent overfitting (higher test loss, larger train/val gap) at
-roughly **14× the training cost**, without improving accuracy. The lever to go
-higher is a **subword tokenizer (BPE)** — a data-representation change, not a
-bigger model. Measuring this and explaining it is the point of building the stack
+**What this shows** — two honest findings, each more interesting than a single
+number:
+
+1. **The transformer does not beat the mean-pooling baseline** (they tie at
+   ~85.5%). A small from-scratch transformer has no edge over a bag-of-embeddings
+   on a task whose signal is a handful of strong words — and it overfits more, at
+   ~14× the cost.
+2. **Subword tokenization (BPE) slightly *hurts* here.** IMDB sentiment lives in
+   common whole words ("great", "terrible"); BPE splits them into subwords,
+   diluting the signal and lengthening sequences (so more of each review is lost
+   to truncation). BPE pays off when the problem is out-of-vocabulary or
+   morphology — not this one.
+
+The real ceiling (~85–86%) is the **model class**: simple, from-scratch models
+with **no pretraining** top out here. The lever that breaks it is pretrained
+representations — the reason modern NLP works — which is the next milestone.
+Measuring and explaining all of this is the point of building the whole stack
 from scratch.
 
 ---
