@@ -26,6 +26,7 @@ import torch
 from polaris.collation import Batch, collate
 from polaris.data import TextSample
 from polaris.data.datasets import IMDBDataset
+from polaris.embeddings import build_embedding_matrix, load_glove
 from polaris.evaluation import evaluate, evaluate_model
 from polaris.experiments import capture_environment, record_run
 from polaris.models import MeanPoolingClassifier, TransformerEncoderClassifier
@@ -51,11 +52,11 @@ BATCH_SIZE = 32
 # Which model to train: "transformer" (from scratch, v0.5) or "pooling" (v0.4).
 MODEL = "transformer"
 
-# Tokenizer: "bpe" (subword, v0.9) or "whitespace" (v0.3).
+# Tokenizer: "whitespace" (v0.3) or "bpe" (subword, v0.9).
 # BPE splits rare/unseen words into subwords instead of <unk>. Its training is a
 # readable reference (not optimized), so on full data it takes a few minutes;
 # lower BPE_VOCAB_SIZE or raise MIN_FREQUENCY if it is too slow.
-TOKENIZER = "bpe"
+TOKENIZER = "whitespace"
 BPE_VOCAB_SIZE = 10_000
 
 EMBEDDING_DIM = 64  # mean-pooling baseline
@@ -66,6 +67,14 @@ NUM_HEADS = 4
 NUM_LAYERS = 2
 FF_DIM = 256
 DROPOUT = 0.1
+
+# Pretrained GloVe embeddings (v0.10): path to a GloVe .txt file, or None.
+# Requires TOKENIZER = "whitespace" (GloVe is word-level). Download e.g.
+# glove.6B.100d.txt and set GLOVE_DIM to match. For the transformer, NUM_HEADS
+# must divide GLOVE_DIM (e.g. 100 / 4 = 25).
+GLOVE_PATH: str | None = None
+GLOVE_DIM = 100
+FREEZE_EMBEDDINGS = False
 
 EPOCHS = 10
 # Transformers prefer a smaller learning rate than the pooling baseline.
@@ -137,8 +146,10 @@ def make_batches(
     return batches
 
 
-def build_model(*, vocab_size: int, pad_id: int) -> torch.nn.Module:
-    """Construct the model selected by ``MODEL``."""
+def build_model(
+    *, vocab_size: int, pad_id: int, pretrained: torch.Tensor | None = None
+) -> torch.nn.Module:
+    """Construct the model selected by ``MODEL`` (optionally GloVe-initialized)."""
     if MODEL == "transformer":
         return TransformerEncoderClassifier(
             vocab_size=vocab_size,
@@ -150,6 +161,8 @@ def build_model(*, vocab_size: int, pad_id: int) -> torch.nn.Module:
             max_len=MAX_LENGTH,
             dropout=DROPOUT,
             pad_id=pad_id,
+            pretrained_embeddings=pretrained,
+            freeze_embeddings=FREEZE_EMBEDDINGS,
         )
     if MODEL == "pooling":
         return MeanPoolingClassifier(
@@ -157,6 +170,8 @@ def build_model(*, vocab_size: int, pad_id: int) -> torch.nn.Module:
             num_classes=NUM_CLASSES,
             embedding_dim=EMBEDDING_DIM,
             pad_id=pad_id,
+            pretrained_embeddings=pretrained,
+            freeze_embeddings=FREEZE_EMBEDDINGS,
         )
     msg = f"unknown MODEL {MODEL!r}; expected 'transformer' or 'pooling'"
     raise ValueError(msg)
@@ -185,9 +200,22 @@ def main() -> None:
     device = resolve_device(DEVICE)
     print(f"Using device: {device}")
 
-    model = build_model(vocab_size=len(tokenizer.vocabulary), pad_id=pad_id)
+    pretrained = None
+    if GLOVE_PATH is not None:
+        if TOKENIZER != "whitespace":
+            raise SystemExit("GLOVE_PATH requires TOKENIZER = 'whitespace'.")
+        print("Loading GloVe embeddings...")
+        vectors = load_glove(GLOVE_PATH)
+        pretrained = build_embedding_matrix(
+            tokenizer.vocabulary, vectors, embedding_dim=GLOVE_DIM, seed=SEED
+        )
+        print(f"  loaded {len(vectors)} vectors ({GLOVE_DIM}d)")
+
+    model = build_model(
+        vocab_size=len(tokenizer.vocabulary), pad_id=pad_id, pretrained=pretrained
+    )
     model.to(device)
-    print(f"Model: {MODEL}")
+    print(f"Model: {MODEL}" + (" + GloVe" if GLOVE_PATH else ""))
 
     config = TrainingConfig(
         epochs=EPOCHS,
@@ -217,7 +245,7 @@ def main() -> None:
 
     # Record the run for reproducibility (config + metrics + report + environment).
     run_dir = record_run(
-        f"runs/imdb_{MODEL}_{TOKENIZER}",
+        f"runs/imdb_{MODEL}_{TOKENIZER}{'_glove' if GLOVE_PATH else ''}",
         config=config,
         history=result.history,
         report=report,

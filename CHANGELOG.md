@@ -15,6 +15,10 @@ Work toward **v0.10.0 — Pretrained Embeddings (GloVe)**. See `ROADMAP.md`.
 - `load_glove` and `build_embedding_matrix` (`polaris.embeddings`): load pretrained GloVe vectors and align them to a `Vocabulary` (GloVe vector per known word, seeded-random for out-of-vocabulary, zeros for padding).
 - `pretrained_embeddings` / `freeze_embeddings` parameters on `MeanPoolingClassifier` and `TransformerEncoderClassifier`, initializing the embedding layer from a matrix.
 
+### Changed
+
+- The IMDB example has a `GLOVE_PATH` setting: point it at a GloVe file (with the whitespace tokenizer) to initialize the model's embeddings from pretrained vectors.
+
 ---
 
 ## [v0.9.0] - 2026-07-05
