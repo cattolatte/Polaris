@@ -31,6 +31,7 @@ from polaris.data import TextSample
 from polaris.data.datasets import IMDBDataset
 from polaris.evaluation import evaluate, evaluate_model
 from polaris.experiments import capture_environment, record_run
+from polaris.inference import save_bundle
 from polaris.models import TransformerEncoderClassifier
 from polaris.pretraining import MaskedLanguageModel, pretrain
 from polaris.tokenizers import WhitespaceTokenizer, build_vocabulary
@@ -224,6 +225,20 @@ def main() -> None:
         seed=SEED,
     )
     print(f"\nRun recorded to: {run_dir}")
+
+    # Save a self-describing bundle so the model can be served / predicted with:
+    #   polaris predict "a wonderful film" --model <bundle> --probs
+    bundle_path = f"{run_dir}/model.pt"
+    save_bundle(
+        bundle_path,
+        model=classifier,
+        tokenizer=tokenizer,
+        model_type="transformer",
+        model_config={"num_classes": NUM_CLASSES, **encoder_kwargs},
+        label_names=CLASS_NAMES,
+        max_length=MAX_LENGTH,
+    )
+    print(f"Model bundle saved to: {bundle_path}")
 
 
 if __name__ == "__main__":

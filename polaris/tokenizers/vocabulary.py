@@ -23,6 +23,7 @@ from __future__ import annotations
 from collections.abc import Mapping
 from dataclasses import dataclass, field
 from types import MappingProxyType
+from typing import Any
 
 __all__ = ["Vocabulary"]
 
@@ -197,6 +198,53 @@ class Vocabulary:
             token
             for token in (self.pad_token, self.unk_token, self.mask_token)
             if token is not None
+        )
+
+    def to_dict(self) -> dict[str, Any]:
+        """Serialize to a plain, JSON-able dictionary.
+
+        The inverse of :meth:`from_dict`. Only the token-to-id mapping and the
+        special-token identities are stored; the reverse mapping and special ids
+        are re-derived on reconstruction.
+
+        Returns
+        -------
+        dict
+            A dictionary with ``token_to_id`` and the special-token keys.
+
+        Examples
+        --------
+        >>> vocab = Vocabulary({"<pad>": 0, "hello": 1}, pad_token="<pad>")
+        >>> restored = Vocabulary.from_dict(vocab.to_dict())
+        >>> restored == vocab
+        True
+        """
+        return {
+            "token_to_id": dict(self.token_to_id),
+            "unk_token": self.unk_token,
+            "pad_token": self.pad_token,
+            "mask_token": self.mask_token,
+        }
+
+    @classmethod
+    def from_dict(cls, data: Mapping[str, Any]) -> Vocabulary:
+        """Reconstruct a ``Vocabulary`` from :meth:`to_dict` output.
+
+        Parameters
+        ----------
+        data : Mapping
+            A mapping as produced by :meth:`to_dict`.
+
+        Returns
+        -------
+        Vocabulary
+            The reconstructed, re-validated vocabulary.
+        """
+        return cls(
+            token_to_id=dict(data["token_to_id"]),
+            unk_token=data.get("unk_token"),
+            pad_token=data.get("pad_token"),
+            mask_token=data.get("mask_token"),
         )
 
     def lookup_id(self, token: str) -> int:

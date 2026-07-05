@@ -68,8 +68,8 @@ These rules apply to every component (see also `CONTRIBUTING.md` and `docs/adr/`
 
 | Item | Status |
 |------|--------------------------|
-| Current Version | `v0.11.0` |
-| Development Stage | Deployment & CLI (v0.12, upcoming) |
+| Current Version | `v0.12.0` |
+| Development Stage | Stabilization toward v1.0 (final feature phase done) |
 | Overall Progress | 🚧 Active Development |
 
 > **Roadmap revised 2026-07-03.** The future phases below were restructured from
@@ -417,7 +417,7 @@ large-external-corpus pretraining beyond the from-scratch-on-a-laptop scope.
 
 ## v0.12.0 — Deployment & CLI
 
-Status: ⏳ Planned
+Status: ✅ Complete
 
 **Goal**
 
@@ -425,15 +425,18 @@ Make trained models usable outside a script, via production-inspired workflows.
 
 **Major Components**
 
-- Inference runtime (`inference/`) — run predictions with a trained model
-- The `polaris` CLI matured into the primary UX (it has been growing since v0.4):
-  train, evaluate, predict
-- Packaging: FastAPI/REST serving and Docker
-- ONNX export *(optional / best-effort — kept out of the critical path)*
+- Inference runtime (`inference/`) — self-describing model bundles
+  (`save_bundle` / `load_bundle`) and a `Predictor` that runs raw text end to end
+- The `polaris` CLI grown with `predict` (classify text) and `serve` (HTTP)
+- Packaging: a FastAPI `POST /predict` app (`deployment/`) and a `Dockerfile`
+- ONNX export *(optional / best-effort — deferred; kept out of the critical path)*
 
 **Outcome**
 
-A trained Polaris model can be served and invoked as a real product.
+A trained Polaris model is a usable artifact: saved as a bundle, reloaded with no
+training code, and invoked from the shell, over HTTP, or in a container. The
+end-to-end story is complete — train a real model on real data, then serve it. The
+dormant registry stayed dormant (a concrete model factory sufficed; ADR-0005).
 
 ---
 

@@ -40,8 +40,9 @@ jobs:
       # `datasets`: the offline IMDB tests patch `datasets.load_dataset`, which
       # needs the package importable. `torch`: the collation/model/training
       # tests use PyTorch (CPU wheels on Linux, configured in pyproject).
+      # `serving`: the deployment tests exercise the FastAPI app via TestClient.
       - name: Install dependencies
-        run: uv sync --extra dev --extra datasets --extra torch
+        run: uv sync --extra dev --extra datasets --extra torch --extra serving
 
       - name: Check formatting (Black)
         run: uv run black --check .

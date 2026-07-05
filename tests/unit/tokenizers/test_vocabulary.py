@@ -405,3 +405,33 @@ def test_special_tokens_must_be_distinct() -> None:
             pad_token="<pad>",
             mask_token="<pad>",
         )
+
+
+# ---------------------------------------------------------------------------
+# serialization
+# ---------------------------------------------------------------------------
+
+
+def test_to_dict_from_dict_round_trip() -> None:
+    """A vocabulary survives a ``to_dict`` / ``from_dict`` round trip intact."""
+    vocabulary = Vocabulary(
+        {"<pad>": 0, "<unk>": 1, "<mask>": 2, "hello": 3},
+        unk_token="<unk>",
+        pad_token="<pad>",
+        mask_token="<mask>",
+    )
+
+    restored = Vocabulary.from_dict(vocabulary.to_dict())
+
+    assert restored == vocabulary
+    assert restored.pad_id == 0
+    assert restored.mask_id == 2
+
+
+def test_from_dict_defaults_missing_specials_to_none() -> None:
+    """A dict with only a mapping reconstructs a vocabulary with no specials."""
+    restored = Vocabulary.from_dict({"token_to_id": {"hello": 0, "world": 1}})
+
+    assert restored.unk_token is None
+    assert restored.pad_token is None
+    assert restored.mask_token is None

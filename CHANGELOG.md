@@ -12,6 +12,35 @@ Nothing yet.
 
 ---
 
+## [v0.12.0] - 2026-07-05
+
+Deployment & CLI — the final feature phase before v1.0. A trained model becomes a
+usable artifact: save a self-describing bundle (model type + config + weights +
+vocabulary + labels), reload it anywhere with no training code, and run it from the
+command line (`polaris predict`), over HTTP (`polaris serve` → FastAPI
+`POST /predict`), or in a container (`Dockerfile`). This closes the end-to-end
+story: a person can now train a real model on a real dataset and *serve* it.
+
+### Added
+
+- `polaris.inference`: turn a trained model into a usable artifact. `save_bundle` /
+  `load_bundle` persist a self-describing bundle (model type + config + weights +
+  vocabulary + labels) and reload it as a ready `Predictor`; `Predictor` runs the
+  whole raw-text path (tokenize → collate → forward → softmax) and returns a
+  `Prediction` (label + per-class probabilities); `build_model` reconstructs a
+  model from its saved type and config.
+- `polaris.deployment`: a thin HTTP serving layer — `create_app` wraps a
+  `Predictor` (loaded from a bundle) in a FastAPI app exposing `GET /health` and
+  `POST /predict`. FastAPI/uvicorn are an optional `serving` extra, imported lazily.
+- CLI commands: `polaris predict TEXT --model BUNDLE [--probs]` (classify raw text)
+  and `polaris serve --model BUNDLE` (serve it over HTTP).
+- A `Dockerfile` to serve a model in a container (model bundle mounted at run time).
+- `Vocabulary.to_dict` / `Vocabulary.from_dict`: a validated serialization
+  round-trip, used by the bundle format.
+- `examples/pretrain_finetune_imdb.py` now saves a bundle at the end of a run.
+
+---
+
 ## [v0.11.0] - 2026-07-05
 
 Self-Supervised Pretraining (Masked Language Modeling). Pretrain Polaris' own

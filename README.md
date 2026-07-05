@@ -161,6 +161,54 @@ controlled experiments — is the entire point of building the stack from scratc
 
 ---
 
+## Using a trained model
+
+A trained model is saved as a self-describing **bundle** (weights + architecture +
+vocabulary + labels) and reloaded with no training code — from the shell, in
+Python, or over HTTP.
+
+**Predict from the command line:**
+
+```bash
+polaris predict "a wonderful, moving film" --model model.pt --probs
+# pos
+#   neg: 0.0180
+#   pos: 0.9820
+```
+
+**Serve it over HTTP** (requires the `serving` extra — `uv sync --extra serving`):
+
+```bash
+polaris serve --model model.pt --port 8000
+curl -s localhost:8000/predict \
+  -H 'content-type: application/json' \
+  -d '{"text": "a wonderful, moving film"}'
+# {"label":"pos","label_id":1,"probabilities":{"neg":0.02,"pos":0.98}}
+```
+
+**Or in a container:**
+
+```bash
+docker build -t polaris-serve .
+docker run --rm -p 8000:8000 -v "$PWD/runs:/models:ro" \
+  -e POLARIS_MODEL=/models/imdb_pretrained_transformer/model.pt polaris-serve
+```
+
+**Or in Python:**
+
+```python
+from polaris.inference import load_bundle
+
+predictor = load_bundle("model.pt")
+predictor.predict("a wonderful, moving film")
+# Prediction(label="pos", label_id=1, probabilities={"neg": 0.02, "pos": 0.98})
+```
+
+Running `examples/pretrain_finetune_imdb.py` writes a ready-to-serve bundle to
+`runs/`.
+
+---
+
 ## Engineering Philosophy
 
 Polaris is built with long-term maintainability as the primary objective.
