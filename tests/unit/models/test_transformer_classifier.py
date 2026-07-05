@@ -71,3 +71,18 @@ def test_transformer_reduces_loss_on_separable_data() -> None:
     losses = train(model, [batch], optimizer=optimizer, epochs=50)
 
     assert losses[-1] < losses[0]
+
+
+def test_uses_pretrained_embeddings() -> None:
+    """A pretrained matrix initializes the transformer's embedding weights."""
+    matrix = torch.randn(12, 16)
+    model = TransformerEncoderClassifier(
+        vocab_size=12,
+        num_classes=2,
+        embed_dim=16,
+        num_heads=2,
+        num_layers=1,
+        pretrained_embeddings=matrix,
+    )
+
+    assert torch.allclose(model.embedding.weight, matrix)

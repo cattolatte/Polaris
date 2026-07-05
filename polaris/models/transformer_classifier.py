@@ -59,9 +59,17 @@ class TransformerEncoderClassifier(nn.Module):
         max_len: int = 512,
         dropout: float = 0.1,
         pad_id: int = 0,
+        pretrained_embeddings: torch.Tensor | None = None,
+        freeze_embeddings: bool = False,
     ) -> None:
         super().__init__()
-        self.embedding = nn.Embedding(vocab_size, embed_dim, padding_idx=pad_id)
+        if pretrained_embeddings is not None:
+            self.embedding = nn.Embedding.from_pretrained(  # type: ignore[no-untyped-call]  # torch stub is untyped
+                pretrained_embeddings, freeze=freeze_embeddings, padding_idx=pad_id
+            )
+            embed_dim = pretrained_embeddings.shape[1]
+        else:
+            self.embedding = nn.Embedding(vocab_size, embed_dim, padding_idx=pad_id)
         self.positional = SinusoidalPositionalEncoding(
             embed_dim=embed_dim, max_len=max_len
         )

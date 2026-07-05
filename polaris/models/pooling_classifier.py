@@ -48,9 +48,17 @@ class MeanPoolingClassifier(nn.Module):
         num_classes: int,
         embedding_dim: int = 64,
         pad_id: int = 0,
+        pretrained_embeddings: torch.Tensor | None = None,
+        freeze_embeddings: bool = False,
     ) -> None:
         super().__init__()
-        self.embedding = nn.Embedding(vocab_size, embedding_dim, padding_idx=pad_id)
+        if pretrained_embeddings is not None:
+            self.embedding = nn.Embedding.from_pretrained(  # type: ignore[no-untyped-call]  # torch stub is untyped
+                pretrained_embeddings, freeze=freeze_embeddings, padding_idx=pad_id
+            )
+            embedding_dim = pretrained_embeddings.shape[1]
+        else:
+            self.embedding = nn.Embedding(vocab_size, embedding_dim, padding_idx=pad_id)
         self.classifier = nn.Linear(embedding_dim, num_classes)
 
     def forward(self, batch: Batch) -> torch.Tensor:

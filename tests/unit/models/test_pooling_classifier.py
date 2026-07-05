@@ -73,3 +73,31 @@ def test_padding_does_not_change_the_result() -> None:
     logits_padded_first_row = model(padded_pair)[:1]
 
     assert torch.allclose(logits_unpadded, logits_padded_first_row, atol=1e-6)
+
+
+# ---------------------------------------------------------------------------
+# Pretrained embeddings
+# ---------------------------------------------------------------------------
+
+
+def test_uses_pretrained_embeddings() -> None:
+    """A pretrained matrix initializes the embedding weights."""
+    matrix = torch.randn(10, 8)
+    model = MeanPoolingClassifier(
+        vocab_size=10, num_classes=2, pad_id=0, pretrained_embeddings=matrix
+    )
+
+    assert torch.allclose(model.embedding.weight, matrix)
+
+
+def test_freeze_embeddings_disables_gradient() -> None:
+    """``freeze_embeddings`` makes the embedding non-trainable."""
+    matrix = torch.randn(10, 8)
+    model = MeanPoolingClassifier(
+        vocab_size=10,
+        num_classes=2,
+        pretrained_embeddings=matrix,
+        freeze_embeddings=True,
+    )
+
+    assert not model.embedding.weight.requires_grad
