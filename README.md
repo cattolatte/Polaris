@@ -318,7 +318,7 @@ Polaris/
 
 ## Contributing
 
-Community contributions are welcome once the project reaches its first public development milestone. As the project matures, contribution guidelines, issue templates, and development documentation will be expanded to support community contributions.
+Contributions are welcome — bug fixes, documentation, tests, and roadmap-fitting features. Start with the [**Contributing Guide**](CONTRIBUTING.md) (engineering principles, dev setup, the four CI gates, PR process) and the [**Code of Conduct**](CODE_OF_CONDUCT.md). Large changes should be discussed in an issue first.
 
 ---
 

@@ -1,88 +1,121 @@
 # Contributing to Polaris
 
-First and foremost, thank you for your interest in contributing to Polaris. We are excited to build a vibrant community around this project.
+Thank you for your interest in contributing to Polaris — an educational,
+reference-implementation-first NLP engineering platform. The primary product is
+*the codebase itself*: an end-to-end NLP system built from scratch, clean enough
+to read as a teaching text and engineered well enough to run a real task
+reproducibly.
 
-Polaris is an open-source NLP Engineering Platform focused on building modern NLP systems using production-inspired software engineering practices. Our goal is to create a platform that is not only powerful but also transparent, maintainable, and educational.
-
----
-
-## Current Project Status
-
-Polaris is currently in its **early, foundational development phase**.
-
-The core architecture is being established, and many foundational components have not yet been implemented. For a detailed view of our development plan, please see the [**Project Roadmap**](ROADMAP.md).
-
-During this stage, we are not actively seeking large feature contributions. However, we welcome:
-
-- Bug reports and architectural discussions via GitHub Issues.
-- Feedback on the project's direction and design.
-- Documentation improvements.
+Polaris is **stable (v1.x)**: the full lifecycle — data, tokenization, collation,
+models, training, evaluation, pretraining, inference, deployment — is implemented
+and released. Contributions of all sizes are welcome: bug fixes, documentation,
+tests, and new functionality that fits the roadmap.
 
 ---
 
-## Guiding Principles
+## The ground rules (read these first)
 
-Every contribution should prioritize:
+Polaris optimizes for **clarity over features**. These principles decide every
+tie-break, and pull requests are reviewed against them:
 
-- **Readability**: Write clear, understandable code and documentation.
-- **Maintainability**: Build components that are easy to debug, extend, and refactor.
-- **Reproducibility**: Ensure that results and behaviors can be consistently reproduced.
-- **Modularity**: Design with clear boundaries and minimal coupling.
-- **Type Safety**: Use modern Python type hints to improve code robustness.
-- **Documentation**: Document code, architecture, and design decisions.
-- **Testing**: Provide comprehensive tests for all new functionality.
+- **Concrete before abstract.** Build one real implementation first. No
+  generality "for later".
+- **Evidence-driven abstraction.** A protocol, base class, or generic is only
+  justified once **two or more** concrete implementations demand it
+  ([ADR-0004](docs/adr/0004-abstraction-policy.md)).
+- **Vertical slices.** Every change leaves Polaris **runnable** — never a model
+  you can't train or a trainer with nothing to train
+  ([ADR-0002](docs/adr/0002-vertical-slice-architecture.md)).
+- **No speculative infrastructure.** Config systems, hooks, plugins, and
+  extension points arrive only when a real component needs them.
+- **From scratch on PyTorch primitives.** Model internals (attention, layernorm,
+  blocks) are hand-written; the framework supplies autograd and data plumbing
+  ([ADR-0003](docs/adr/0003-tensor-framework.md)).
+- **Own the interface.** Third-party libraries are implementation details:
+  import optional deps lazily, expose only Polaris-native types at module
+  boundaries, wrap failures in a `PolarisError` subclass.
+- **Readability over cleverness.** The reader is a learner. Prefer the obvious
+  implementation.
 
-The goal is to build software that is understandable and maintainable over the long term.
-
----
-
-## Reporting Issues
-
-If you discover a bug, have an architectural concern, or find an issue in the documentation, please [**open an issue**](https://github.com/cattolatte/Polaris/issues) on GitHub.
-
-Please provide a clear and concise description, including:
-
-- A summary of the issue.
-- The expected behavior.
-- The actual behavior.
-- Steps to reproduce the issue (if applicable).
-
----
-
-## Pull Requests
-
-While we are focusing on the core architecture, we will begin accepting pull requests for bug fixes and approved features as the project matures.
-
-When submitting a pull request, please ensure it adheres to the following:
-
-- **Scope**: Keep changes focused and well-scoped to a single issue or feature.
-- **Structure**: Follow the existing project structure and architectural patterns.
-- **Commits**: Write clear, atomic commit messages.
-- **Documentation**: Include or update documentation where appropriate.
-- **Tests**: Add or update tests to cover any new functionality or bug fixes.
-
-> **Note**: Large architectural changes **must** be discussed in a GitHub Issue before implementation begins. This ensures alignment with the project's long-term vision.
+Major architectural decisions are recorded as ADRs in [`docs/adr/`](docs/adr/) —
+significant changes need one. **Large changes must be discussed in a GitHub
+Issue before implementation begins.**
 
 ---
 
-## Coding Standards
+## Development setup
 
-Polaris follows modern Python best practices and a strict set of coding standards to ensure quality and consistency.
+Polaris requires **Python 3.12+** and uses [`uv`](https://github.com/astral-sh/uv):
 
-- **Version**: Python 3.12+
-- **Formatting**: We will use [**Black**](https://github.com/psf/black) for code formatting and [**Ruff**](https://github.com/astral-sh/ruff) for linting and import sorting.
-- **Type Checking**: We will use [**MyPy**](http://mypy-lang.org/) for static type checking. All new code should be fully type-hinted.
-- **Testing**: We will use [**Pytest**](https://pytest.org/) for our test suite.
-- **Principles**: Adherence to Clean Architecture and SOLID principles is expected.
+```bash
+git clone https://github.com/cattolatte/Polaris.git
+cd Polaris
+uv sync --extra dev --extra datasets --extra torch --extra serving
+```
 
-Configuration for these tools will be provided in the repository.
+### The four gates
+
+CI runs these on every PR (Python 3.12 & 3.13 × Ubuntu & macOS), and all four
+must pass — run them locally before opening a PR:
+
+```bash
+uv run black --check .    # formatting (line length 88)
+uv run ruff check .       # lint + import sort
+uv run mypy polaris       # strict type checking
+uv run pytest             # tests (coverage gate: ≥90%)
+```
+
+---
+
+## Code conventions
+
+- Start every module with `from __future__ import annotations`.
+- Full type hints (MyPy `strict`); modern syntax (`type X = ...`, `StrEnum`,
+  `X | None`).
+- Immutable value objects: `@dataclass(frozen=True, slots=True)`, invariants
+  validated in `__post_init__`, mutable inputs wrapped in `MappingProxyType`.
+- Module docstrings carry a **"Design Principles"** section stating what the
+  module deliberately does *not* do. Public classes get NumPy-style docstrings
+  (Parameters / Returns / Raises / Examples).
+- Raise from the `PolarisError` hierarchy at public boundaries; chain with
+  `from`.
+
+## Test conventions
+
+- **Unit tests run fully offline** — no network, no downloads, no fetched
+  weights. Mock external backends with minimal hand-written fakes at the
+  boundary only.
+- **Test the public contract, not internals.** For model/training code, assert
+  shapes, invariants, and learning behavior on tiny fixtures — not exact floats.
+- Function-based tests (no test classes), one behavior per test, a docstring per
+  test, grouped with `# ---` banner comments. See
+  `tests/unit/tokenizers/test_vocabulary.py` for the style.
+
+---
+
+## Pull requests
+
+1. **Open or find an issue first** for anything non-trivial.
+2. Branch from `main`, keep the change **focused on a single concern**.
+3. Make sure the four gates pass and tests stay offline.
+4. Update documentation touched by the change: the module README,
+   `docs/design/` if a phase's design shifted, and `CHANGELOG.md` (under
+   `[Unreleased]`).
+5. Fill in the PR template — it mirrors this checklist.
+
+Releases (version bumps, tags, PyPI publishing) are handled by the maintainer;
+PRs should not bump versions.
+
+## Reporting issues
+
+Use the [issue templates](https://github.com/cattolatte/Polaris/issues/new/choose).
+For bugs, include: what you expected, what happened, steps to reproduce, and your
+environment (OS, Python, package version — `polaris info`).
 
 ---
 
 ## Code of Conduct
 
-All contributors are expected to read and adhere to the project's [**Code of Conduct**](CODE_OF_CONDUCT.md). We are committed to fostering a welcoming and respectful community.
-
----
-
-Thank you for helping make Polaris a better platform for everyone.
+All contributors are expected to follow the project's
+[**Code of Conduct**](CODE_OF_CONDUCT.md). We are committed to a welcoming and
+respectful community.
