@@ -68,9 +68,9 @@ These rules apply to every component (see also `CONTRIBUTING.md` and `docs/adr/`
 
 | Item | Status |
 |------|--------------------------|
-| Current Version | `v0.12.0` |
-| Development Stage | Stabilization toward v1.0 (final feature phase done) |
-| Overall Progress | 🚧 Active Development |
+| Current Version | `v1.0.0` |
+| Development Stage | Stable — first public release |
+| Overall Progress | ✅ v1.0 released — stable |
 
 > **Roadmap revised 2026-07-03.** The future phases below were restructured from
 > horizontal layers into vertical slices, and scope was reduced, following the
@@ -442,7 +442,7 @@ dormant registry stayed dormant (a concrete model factory sufficed; ADR-0005).
 
 ## v1.0.0 — Polaris Stable
 
-Status: 🔒 Future
+Status: ✅ Complete
 
 **Goal**
 
@@ -451,15 +451,21 @@ a teaching text and runs a real task reproducibly, end to end.
 
 **Objectives**
 
-- Stable public APIs
-- Comprehensive documentation and tutorials
-- Complete testing (with a CI matrix and coverage gate)
+- Stable public APIs — the per-module `__all__` surfaces are frozen under semver;
+  the top-level package stays minimal (only `__version__`) so importing `polaris`
+  is cheap and needs no optional extras
+- Documentation pass — every implemented module has an accurate README, plus an
+  Installation and Quickstart in the top-level README
+- Complete testing — a CI matrix (Python 3.12 & 3.13 × Ubuntu & macOS) with the
+  coverage gate enforced
 - Modular architecture, reproducible workflows
-- Public release
 
 **Outcome**
 
-First production-ready public release.
+The first stable release: the full from-scratch NLP lifecycle — data → tokenization
+→ collation → models → training → evaluation → pretraining → deployment — runnable
+end to end, documented, and frozen under semver. (PyPI publishing follows in v1.0.1;
+an interactive console is a later v1.x addition.)
 
 ---
 

@@ -19,8 +19,15 @@ concurrency:
 
 jobs:
   test:
-    name: Python 3.12
-    runs-on: ubuntu-latest
+    name: ${{ matrix.os }} · Python ${{ matrix.python-version }}
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      # Don't cancel the other matrix legs when one fails — surface every break.
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        python-version: ["3.12", "3.13"]
 
     steps:
       - name: Checkout repository
@@ -35,7 +42,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.12"
+          python-version: ${{ matrix.python-version }}
 
       # `datasets`: the offline IMDB tests patch `datasets.load_dataset`, which
       # needs the package importable. `torch`: the collation/model/training

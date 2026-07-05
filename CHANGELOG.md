@@ -12,6 +12,29 @@ Nothing yet.
 
 ---
 
+## [v1.0.0] - 2026-07-05
+
+**Polaris Stable — the first public release.** No new features: this is the
+graduation pass over everything built across v0.1–v0.12. The full from-scratch NLP
+lifecycle — data → tokenization → collation → models (a from-scratch transformer) →
+training → evaluation → experiment tracking → pretrained embeddings →
+self-supervised pretraining → deployment — is runnable end to end, documented, and
+frozen under semantic versioning.
+
+### Changed
+
+- **API freeze.** The public API is each module's `__all__`; these surfaces are now
+  stable under semver. The top-level `polaris` package intentionally stays minimal
+  (only `__version__`) so importing it is cheap and needs no optional extras.
+- **Documentation pass.** Every implemented module now has an accurate README (fixed
+  the `core`, `models`, `evaluation`, `experiments`, and `utils` stubs; added
+  `collation` and `embeddings`). The top-level README gains **Installation** and
+  **Quickstart** sections, and the badges/intro reflect the stable release.
+- **CI hardening.** The workflow now runs a matrix — Python 3.12 & 3.13 on Ubuntu
+  and macOS — with the `fail_under = 90` coverage gate enforced.
+
+---
+
 ## [v0.12.0] - 2026-07-05
 
 Deployment & CLI — the final feature phase before v1.0. A trained model becomes a

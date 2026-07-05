@@ -6,16 +6,16 @@
 
 *Build. Train. Evaluate. Deploy.*
 
-[![Status](https://img.shields.io/badge/status-under%20development-orange)](https://github.com/cattolatte/Polaris)
-[![Version](https://img.shields.io/badge/version-v0.9.0-blue)](CHANGELOG.md)
+[![Status](https://img.shields.io/badge/status-stable-brightgreen)](https://github.com/cattolatte/Polaris/releases)
+[![Version](https://img.shields.io/badge/version-v1.0.0-blue)](CHANGELOG.md)
 [![Python](https://img.shields.io/badge/python-3.12+-blue)](https://www.python.org)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 ---
 
-**Polaris is currently under active development and is not yet ready for production use.**
+**Polaris v1.0 — a complete, from-scratch NLP system you can read end to end and run reproducibly.**
 
-This repository represents the beginning of a long-term effort to build a production-inspired, **educational** engineering platform for modern Natural Language Processing (NLP) systems, emphasizing clean architecture, reproducibility, modularity, and software engineering best practices.
+Polaris is a production-inspired, **educational** engineering platform for modern Natural Language Processing: an end-to-end NLP stack — data, tokenization, collation, models, training, evaluation, and deployment — built from scratch on PyTorch tensors, clean enough to read as a teaching text and engineered well enough to train a real model on a real dataset and serve it. The primary product is the codebase itself.
 
 </div>
 
@@ -53,6 +53,52 @@ Polaris is being designed around the following principles:
 - **Strong Testing & Documentation**: Maintain high standards for code quality and usability.
 - **Educational**: Provide clear, well-documented implementations of modern NLP concepts.
 - **End-to-End**: Cover the entire NLP engineering workflow within a single, cohesive platform.
+
+---
+
+## Installation
+
+Polaris requires **Python 3.12+**. It is not yet on PyPI (planned) — install from
+source with [`uv`](https://github.com/astral-sh/uv):
+
+```bash
+git clone https://github.com/cattolatte/Polaris.git
+cd Polaris
+uv sync --extra torch                 # core + models/training
+# optional extras, as needed:
+uv sync --extra torch --extra datasets   # the IMDB dataset backend
+uv sync --extra torch --extra serving     # FastAPI HTTP serving
+uv sync --extra dev                       # black, ruff, mypy, pytest
+```
+
+Or straight from GitHub with pip:
+
+```bash
+pip install "git+https://github.com/cattolatte/Polaris.git"
+```
+
+Either way you get the `polaris` command-line tool.
+
+## Quickstart
+
+**Train and serve your first model** on IMDB sentiment, end to end:
+
+```bash
+# 1. Train (and, in this example, self-supervised pretrain) a model, then save a
+#    reusable bundle to runs/. Turn the sample counts down for a quick first run.
+uv run --extra datasets --extra torch python examples/pretrain_finetune_imdb.py
+
+# 2. Predict on new text from the shell.
+polaris predict "a wonderful, moving film" \
+  --model runs/imdb_pretrained_transformer/model.pt --probs
+
+# 3. Or serve it over HTTP.
+uv run --extra torch --extra serving \
+  polaris serve --model runs/imdb_pretrained_transformer/model.pt
+```
+
+For a minimal training loop in Python, see [`examples/train_imdb_sentiment.py`](examples/train_imdb_sentiment.py);
+for using a saved model, see [Using a trained model](#using-a-trained-model) below.
 
 ---
 
