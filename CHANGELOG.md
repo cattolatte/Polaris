@@ -12,6 +12,24 @@ Nothing yet.
 
 ---
 
+## [v1.0.1] - 2026-07-05
+
+**First PyPI release** — Polaris is now installable with `pip install polaris-nlp`
+(the import and CLI name remain `polaris`). No code changes.
+
+### Added
+
+- A `Release to PyPI` workflow (`.github/workflows/release.yml`): pushing a version
+  tag builds the sdist/wheel and publishes to PyPI via **trusted publishing**
+  (OIDC) — no API token is stored in the repository.
+
+### Changed
+
+- Package classifier updated from `Development Status :: 3 - Alpha` to
+  `5 - Production/Stable`, matching the v1.0 release.
+
+---
+
 ## [v1.0.0] - 2026-07-05
 
 **Polaris Stable — the first public release.** No new features: this is the

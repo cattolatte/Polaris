@@ -58,26 +58,24 @@ Polaris is being designed around the following principles:
 
 ## Installation
 
-Polaris requires **Python 3.12+**. It is not yet on PyPI (planned) — install from
-source with [`uv`](https://github.com/astral-sh/uv):
+Polaris requires **Python 3.12+**. Install from PyPI:
+
+```bash
+pip install polaris-nlp                    # core + the `polaris` CLI
+pip install "polaris-nlp[torch]"           # + models, training, inference
+pip install "polaris-nlp[torch,datasets]"  # + the IMDB dataset backend
+pip install "polaris-nlp[torch,serving]"   # + FastAPI HTTP serving
+```
+
+(The distribution is `polaris-nlp`; the import and CLI name are `polaris`.)
+
+Or work from source with [`uv`](https://github.com/astral-sh/uv):
 
 ```bash
 git clone https://github.com/cattolatte/Polaris.git
 cd Polaris
-uv sync --extra torch                 # core + models/training
-# optional extras, as needed:
-uv sync --extra torch --extra datasets   # the IMDB dataset backend
-uv sync --extra torch --extra serving     # FastAPI HTTP serving
-uv sync --extra dev                       # black, ruff, mypy, pytest
+uv sync --extra dev --extra torch   # plus --extra datasets / --extra serving as needed
 ```
-
-Or straight from GitHub with pip:
-
-```bash
-pip install "git+https://github.com/cattolatte/Polaris.git"
-```
-
-Either way you get the `polaris` command-line tool.
 
 ## Quickstart
 
