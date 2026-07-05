@@ -54,7 +54,8 @@ under semver.
 
 ### 4. Consistency sweep
 
-- Update the repository guidance to reflect the finished stack.
+- Update the repository guidance (`CONTRIBUTING.md`, module READMEs) to reflect
+  the finished stack.
 - Mark v1.0.0 complete in ROADMAP; update the header.
 - CHANGELOG: promote to `v1.0.0` with a summary of the journey.
 
