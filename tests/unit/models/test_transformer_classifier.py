@@ -85,4 +85,4 @@ def test_uses_pretrained_embeddings() -> None:
         pretrained_embeddings=matrix,
     )
 
-    assert torch.allclose(model.embedding.weight, matrix)
+    assert torch.allclose(model.encoder.embedding.weight, matrix)

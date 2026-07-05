@@ -28,13 +28,14 @@ def build_vocabulary(
     *,
     unk_token: str | None = None,
     pad_token: str | None = None,
+    mask_token: str | None = None,
     min_frequency: int = 1,
     max_size: int | None = None,
 ) -> Vocabulary:
     """Build a ``Vocabulary`` from tokenized text.
 
-    Special tokens are reserved first (padding before unknown), followed by
-    corpus tokens ordered by descending frequency, with ties broken
+    Special tokens are reserved first (padding, then unknown, then mask),
+    followed by corpus tokens ordered by descending frequency, with ties broken
     alphabetically for determinism. Ids are assigned contiguously from ``0``.
 
     Parameters
@@ -48,6 +49,9 @@ def build_vocabulary(
     pad_token : str, optional
         If given, reserved as the padding token and passed through to the
         resulting ``Vocabulary``.
+    mask_token : str, optional
+        If given, reserved as the masked-language-model mask token and passed
+        through to the resulting ``Vocabulary``.
     min_frequency : int, default 1
         Corpus tokens appearing fewer than this many times are dropped. Must
         be at least ``1``.
@@ -83,7 +87,7 @@ def build_vocabulary(
         raise ValueError(msg)
 
     specials: list[str] = []
-    for token in (pad_token, unk_token):
+    for token in (pad_token, unk_token, mask_token):
         if token is not None and token not in specials:
             specials.append(token)
 
@@ -122,4 +126,5 @@ def build_vocabulary(
         token_to_id=token_to_id,
         unk_token=unk_token,
         pad_token=pad_token,
+        mask_token=mask_token,
     )

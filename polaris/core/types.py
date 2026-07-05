@@ -23,7 +23,7 @@ from dataclasses import dataclass, field
 from enum import StrEnum
 from typing import Literal
 
-type DatasetSplit = Literal["train", "test"]
+type DatasetSplit = Literal["train", "test", "unsupervised"]
 # ============================================================
 # Type Aliases
 # ============================================================

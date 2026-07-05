@@ -50,14 +50,19 @@ class Vocabulary:
         The token used to pad sequences to equal length. If given, it must
         be a key of ``token_to_id``. ``Vocabulary`` only records its
         identity; padding itself is performed by the collation layer.
+    mask_token : str, optional
+        The token substituted for hidden positions during masked-language-model
+        pretraining. If given, it must be a key of ``token_to_id``.
+        ``Vocabulary`` only records its identity; masking itself is performed by
+        the pretraining layer.
 
     Raises
     ------
     ValueError
         If any token id is negative, if token ids are not unique, if the
         ids are not contiguous starting from ``0``, if a supplied special
-        token is not present in ``token_to_id``, or if ``unk_token`` and
-        ``pad_token`` are equal.
+        token is not present in ``token_to_id``, or if any two configured
+        special tokens are equal.
 
     Examples
     --------
@@ -84,10 +89,12 @@ class Vocabulary:
     token_to_id: Mapping[str, int]
     unk_token: str | None = None
     pad_token: str | None = None
+    mask_token: str | None = None
 
     id_to_token: Mapping[int, str] = field(init=False)
     unk_id: int | None = field(init=False)
     pad_id: int | None = field(init=False)
+    mask_id: int | None = field(init=False)
 
     def __post_init__(self) -> None:
         """Validate invariants and derive the reverse mapping and special ids.
@@ -120,21 +127,27 @@ class Vocabulary:
             {token_id: token for token, token_id in resolved_token_to_id.items()}
         )
 
-        for role, token in (
+        specials = (
             ("unk_token", self.unk_token),
             ("pad_token", self.pad_token),
-        ):
+            ("mask_token", self.mask_token),
+        )
+        for role, token in specials:
             if token is not None and token not in resolved_token_to_id:
                 msg = f"{role} {token!r} is not present in the vocabulary"
                 raise ValueError(msg)
 
-        if (
-            self.unk_token is not None
-            and self.pad_token is not None
-            and self.unk_token == self.pad_token
-        ):
-            msg = "unk_token and pad_token must be different tokens"
-            raise ValueError(msg)
+        seen_specials: dict[str, str] = {}
+        for role, token in specials:
+            if token is None:
+                continue
+            if token in seen_specials:
+                msg = (
+                    f"{role} and {seen_specials[token]} must be different tokens, "
+                    f"both are {token!r}"
+                )
+                raise ValueError(msg)
+            seen_specials[token] = role
 
         object.__setattr__(self, "token_to_id", resolved_token_to_id)
         object.__setattr__(self, "id_to_token", resolved_id_to_token)
@@ -147,6 +160,11 @@ class Vocabulary:
             self,
             "pad_id",
             None if self.pad_token is None else resolved_token_to_id[self.pad_token],
+        )
+        object.__setattr__(
+            self,
+            "mask_id",
+            None if self.mask_token is None else resolved_token_to_id[self.mask_token],
         )
 
     @property
@@ -164,8 +182,8 @@ class Vocabulary:
     def special_tokens(self) -> tuple[str, ...]:
         """tuple[str, ...]: The configured special tokens, padding first.
 
-        Contains whichever of ``pad_token`` and ``unk_token`` are set, in
-        that order. Empty when neither is configured.
+        Contains whichever of ``pad_token``, ``unk_token`` and ``mask_token``
+        are set, in that order. Empty when none is configured.
 
         Examples
         --------
@@ -176,7 +194,9 @@ class Vocabulary:
         ('<pad>', '<unk>')
         """
         return tuple(
-            token for token in (self.pad_token, self.unk_token) if token is not None
+            token
+            for token in (self.pad_token, self.unk_token, self.mask_token)
+            if token is not None
         )
 
     def lookup_id(self, token: str) -> int:

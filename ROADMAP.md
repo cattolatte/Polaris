@@ -68,8 +68,8 @@ These rules apply to every component (see also `CONTRIBUTING.md` and `docs/adr/`
 
 | Item | Status |
 |------|--------------------------|
-| Current Version | `v0.10.0` |
-| Development Stage | Self-Supervised Pretraining (v0.11, in progress) |
+| Current Version | `v0.11.0` |
+| Development Stage | Deployment & CLI (v0.12, upcoming) |
 | Overall Progress | 🚧 Active Development |
 
 > **Roadmap revised 2026-07-03.** The future phases below were restructured from
@@ -376,7 +376,7 @@ self-supervised *contextual* pretraining (v0.11).
 
 ## v0.11.0 — Self-Supervised Pretraining (Masked Language Modeling)
 
-Status: 🚧 In Progress
+Status: ✅ Complete
 
 **Goal**
 
@@ -402,8 +402,16 @@ not a borrowed model.
 
 **Outcome**
 
-The genuine accuracy lever — contextual pretraining — demonstrated on Polaris' own
-from-scratch stack, with the whole pretrain→fine-tune thread runnable end to end.
+Contextual pretraining demonstrated on Polaris' own from-scratch stack, with the
+whole pretrain → fine-tune thread runnable end to end. A controlled ablation (same
+vocabulary and 4-layer architecture) shows pretraining works as designed — a large
+warm start (epoch-1 validation 0.810 vs 0.736), faster convergence, higher best
+validation (0.864 vs 0.851) — but converges to the same ~86% test ceiling (0.853 vs
+0.852): 25k labels already suffice, and the small in-domain corpus injects little
+new knowledge. This closes an honest four-lever investigation (transformer, BPE,
+GloVe, MLM pretraining), all landing at ~85-86% — the ceiling is the task and
+data/compute regime, not any one component. Breaking it further would require
+large-external-corpus pretraining beyond the from-scratch-on-a-laptop scope.
 
 ---
 

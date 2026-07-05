@@ -1,9 +1,15 @@
 """A transformer-encoder text classifier, from Polaris' from-scratch blocks.
 
-The v0.5 model: token embeddings + positional encoding, a stack of transformer
-encoder blocks, mask-aware mean pooling, and a linear head. It consumes a
+The v0.5 model: the shared
+:class:`~polaris.models.transformer_encoder.TransformerEncoder` trunk (token
+embeddings + positional encoding + encoder blocks + final norm) followed by
+mask-aware mean pooling and a linear head. It consumes a
 :class:`~polaris.collation.batch.Batch` and returns logits — a drop-in
 replacement for the v0.4 baseline in the same training loop.
+
+Since v0.11 the trunk is a reusable module (:class:`TransformerEncoder`) shared
+with the masked-language model, so a pretrained trunk transfers into this
+classifier by copying ``encoder`` weights.
 """
 
 from __future__ import annotations
@@ -12,11 +18,7 @@ import torch
 from torch import nn
 
 from polaris.collation.batch import Batch
-from polaris.models.transformer import (
-    LayerNorm,
-    SinusoidalPositionalEncoding,
-    TransformerEncoderBlock,
-)
+from polaris.models.transformer_encoder import TransformerEncoder
 
 __all__ = ["TransformerEncoderClassifier"]
 
@@ -63,30 +65,19 @@ class TransformerEncoderClassifier(nn.Module):
         freeze_embeddings: bool = False,
     ) -> None:
         super().__init__()
-        if pretrained_embeddings is not None:
-            self.embedding = nn.Embedding.from_pretrained(  # type: ignore[no-untyped-call]  # torch stub is untyped
-                pretrained_embeddings, freeze=freeze_embeddings, padding_idx=pad_id
-            )
-            embed_dim = pretrained_embeddings.shape[1]
-        else:
-            self.embedding = nn.Embedding(vocab_size, embed_dim, padding_idx=pad_id)
-        self.positional = SinusoidalPositionalEncoding(
-            embed_dim=embed_dim, max_len=max_len
+        self.encoder = TransformerEncoder(
+            vocab_size=vocab_size,
+            embed_dim=embed_dim,
+            num_heads=num_heads,
+            num_layers=num_layers,
+            ff_dim=ff_dim,
+            max_len=max_len,
+            dropout=dropout,
+            pad_id=pad_id,
+            pretrained_embeddings=pretrained_embeddings,
+            freeze_embeddings=freeze_embeddings,
         )
-        self.dropout = nn.Dropout(dropout)
-        self.blocks = nn.ModuleList(
-            [
-                TransformerEncoderBlock(
-                    embed_dim=embed_dim,
-                    num_heads=num_heads,
-                    ff_dim=ff_dim,
-                    dropout=dropout,
-                )
-                for _ in range(num_layers)
-            ]
-        )
-        self.norm = LayerNorm(embed_dim)
-        self.classifier = nn.Linear(embed_dim, num_classes)
+        self.classifier = nn.Linear(self.encoder.embed_dim, num_classes)
 
     def forward(self, batch: Batch) -> torch.Tensor:
         """Compute class logits for a batch.
@@ -101,17 +92,10 @@ class TransformerEncoderClassifier(nn.Module):
         torch.Tensor
             Logits of shape ``(batch_size, num_classes)``.
         """
-        hidden: torch.Tensor = self.embedding(batch.input_ids)
-        hidden = self.positional(hidden)
-        hidden = self.dropout(hidden)
-
-        mask = batch.attention_mask
-        for block in self.blocks:
-            hidden = block(hidden, key_padding_mask=mask)
-        hidden = self.norm(hidden)
+        hidden = self.encoder(batch.input_ids, batch.attention_mask)  # (B, S, E)
 
         # Mask-aware mean pool over the real tokens.
-        mask_f = mask.unsqueeze(-1).to(hidden.dtype)
+        mask_f = batch.attention_mask.unsqueeze(-1).to(hidden.dtype)
         summed = (hidden * mask_f).sum(dim=1)
         token_counts = mask_f.sum(dim=1).clamp(min=1.0)
         pooled = summed / token_counts

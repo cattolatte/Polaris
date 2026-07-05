@@ -356,3 +356,52 @@ def test_get_id_without_unk_raises_key_error() -> None:
 
     with pytest.raises(KeyError):
         vocabulary.get_id("missing")
+
+
+# ---------------------------------------------------------------------------
+# mask token
+# ---------------------------------------------------------------------------
+
+
+def test_mask_token_derives_mask_id() -> None:
+    """A configured mask token derives its id, like unk and pad."""
+    vocabulary = Vocabulary(
+        {"<pad>": 0, "<mask>": 1, "hello": 2},
+        pad_token="<pad>",
+        mask_token="<mask>",
+    )
+
+    assert vocabulary.mask_id == 1
+
+
+def test_mask_id_is_none_when_unset() -> None:
+    """Without a mask token, ``mask_id`` is ``None``."""
+    assert Vocabulary({"hello": 0}).mask_id is None
+
+
+def test_special_tokens_include_mask_last() -> None:
+    """``special_tokens`` lists padding, then unknown, then mask."""
+    vocabulary = Vocabulary(
+        {"<pad>": 0, "<unk>": 1, "<mask>": 2},
+        unk_token="<unk>",
+        pad_token="<pad>",
+        mask_token="<mask>",
+    )
+
+    assert vocabulary.special_tokens == ("<pad>", "<unk>", "<mask>")
+
+
+def test_mask_token_must_be_present() -> None:
+    """A mask token absent from the mapping is rejected."""
+    with pytest.raises(ValueError, match="mask_token"):
+        Vocabulary({"hello": 0}, mask_token="<mask>")
+
+
+def test_special_tokens_must_be_distinct() -> None:
+    """Two special roles cannot share the same token."""
+    with pytest.raises(ValueError, match="different tokens"):
+        Vocabulary(
+            {"<pad>": 0, "hello": 1},
+            pad_token="<pad>",
+            mask_token="<pad>",
+        )

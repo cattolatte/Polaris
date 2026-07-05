@@ -8,8 +8,47 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
-Work toward **v0.11.0 — Self-Supervised Pretraining (Masked Language Modeling)**.
-See `ROADMAP.md`.
+Nothing yet.
+
+---
+
+## [v0.11.0] - 2026-07-05
+
+Self-Supervised Pretraining (Masked Language Modeling). Pretrain Polaris' own
+transformer on unlabeled text with an MLM objective, then transfer the trunk into
+a classifier and fine-tune — the BERT recipe, from scratch, no downloads. A
+controlled ablation (same vocabulary and 4-layer architecture, pretraining the only
+difference) shows pretraining works in the expected direction — a large warm start
+(epoch-1 validation 0.810 vs 0.736), faster convergence, higher best validation
+(0.864 vs 0.851) — but converges to the same ~86% test ceiling (0.853 vs 0.852),
+because 25k labels already suffice and the small in-domain corpus injects little new
+knowledge. Four from-scratch levers (transformer, BPE, GloVe, MLM pretraining) now
+all land at ~85-86%: the ceiling is the task and data/compute regime, not any one
+component.
+
+### Added
+
+- `polaris.pretraining`: masked-language-model pretraining from scratch —
+  `mask_tokens` / `MaskedLMBatch` (BERT-style 80/10/10 masking with dynamic,
+  seedable corruption), `MaskedLanguageModel` (shared trunk + vocabulary head,
+  with `transfer_encoder_to` for moving a pretrained trunk into a classifier),
+  and `pretrain` (the MLM loop: masked-position cross-entropy, warmup scheduling,
+  per-epoch loss and masked-token accuracy).
+- `TransformerEncoder` (`polaris.models`): the shared, headless transformer trunk
+  (embedding + positional + encoder blocks + final norm → per-token hidden
+  states), now reused by both the classifier and the masked-language model.
+- `mask_token` / `mask_id` on `Vocabulary`, and a `mask_token` argument on
+  `build_vocabulary`.
+- IMDB's `"unsupervised"` split (50,000 unlabeled reviews) is now loadable via
+  `IMDBDataset`, for pretraining.
+- `examples/pretrain_finetune_imdb.py`: the full pretrain → transfer → fine-tune
+  thread on IMDB.
+
+### Changed
+
+- `TransformerEncoderClassifier` is refactored to compose the shared
+  `TransformerEncoder` trunk (behavior-preserving; its trunk weights now live
+  under the `encoder` submodule).
 
 ---
 

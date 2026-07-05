@@ -167,3 +167,23 @@ def test_builder_is_deterministic_across_calls() -> None:
     corpus = [["the", "cat", "sat"], ["the", "dog", "sat"]]
 
     assert build_vocabulary(corpus) == build_vocabulary(corpus)
+
+
+# ---------------------------------------------------------------------------
+# mask token
+# ---------------------------------------------------------------------------
+
+
+def test_builder_reserves_mask_token() -> None:
+    """The mask token is reserved after padding and unknown."""
+    vocabulary = build_vocabulary(
+        [["good", "movie"]],
+        pad_token="<pad>",
+        unk_token="<unk>",
+        mask_token="<mask>",
+    )
+
+    assert vocabulary.pad_id == 0
+    assert vocabulary.unk_id == 1
+    assert vocabulary.mask_id == 2
+    assert vocabulary.lookup_id("good") == 3

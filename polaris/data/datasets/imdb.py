@@ -33,7 +33,7 @@ from polaris.errors import (
 if TYPE_CHECKING:
     from datasets import Dataset as HFDataset
 
-_VALID_SPLITS: Final[tuple[DatasetSplit, ...]] = ("train", "test")
+_VALID_SPLITS: Final[tuple[DatasetSplit, ...]] = ("train", "test", "unsupervised")
 _LABEL_NAMES: Final[tuple[str, str]] = ("neg", "pos")
 
 
@@ -46,7 +46,9 @@ class IMDBDataset(Dataset):
     Parameters
     ----------
     split:
-        Dataset split to load. One of ``"train"`` or ``"test"``.
+        Dataset split to load. One of ``"train"``, ``"test"``, or
+        ``"unsupervised"`` (50,000 unlabeled reviews, label ``-1``, for
+        self-supervised pretraining).
 
     Notes
     -----

@@ -104,7 +104,7 @@ evaluation). Runs are recorded and reproducible.
 TEST_SAMPLES = 25000`, plus the `MODEL` / `TOKENIZER` / `GLOVE_PATH` switches).</sub>
 
 **What this shows** — three honest findings, each more interesting than a single
-number. We pulled the three plausible levers, and **every one bounces off ~86%**:
+number. We pulled the three cheap levers, and **every one bounces off ~86%**:
 
 1. **The transformer does not beat the mean-pooling baseline** (they tie at
    ~85.5%). A small from-scratch transformer has no edge over a bag-of-embeddings
@@ -121,12 +121,43 @@ number. We pulled the three plausible levers, and **every one bounces off ~86%**
    25,000 labeled reviews the model learns good embeddings from scratch anyway,
    so GloVe's head start is redundant.
 
-The real ceiling (~85–86%) is the **model class**: simple, from-scratch models
-with **no contextual pretraining** top out here — tokenization and pretrained
-word vectors both bounce off it. The lever that actually breaks it is
-**self-supervised pretraining** (learn language from unlabeled text, then
-fine-tune) — the reason modern NLP works, and the next milestone. Measuring and
-explaining all of this is the point of building the whole stack from scratch.
+### Self-supervised pretraining (the fourth lever)
+
+The lever that *actually* transformed NLP is **self-supervised pretraining**:
+learn language from unlabeled text with a masked-language-model objective, then
+fine-tune. Polaris implements this from scratch (v0.11) — pretrain our own
+transformer trunk on the 50,000 **unlabeled** IMDB reviews, then transfer it into
+the classifier. A controlled ablation (identical vocabulary and 4-layer
+architecture; the only difference is the pretraining):
+
+| 4-layer transformer | Test accuracy | Best val | Epoch-1 val |
+| :--- | :---: | :---: | :---: |
+| Random-init trunk (no pretraining) | 0.852 | 0.851 | 0.736 |
+| **MLM-pretrained trunk** | **0.853** | **0.864** | **0.810** |
+
+Pretraining **works, in exactly the expected direction** — a large head start
+(epoch-1 validation 0.810 vs 0.736), faster convergence, and a higher best
+validation — but it converges to the **same ~86% test ceiling**. Two reasons, and
+they are the whole lesson:
+
+- **Labels aren't scarce.** 25,000 labeled reviews already suffice for the model
+  to learn good features directly, so a warm start reaches the same destination,
+  just faster.
+- **The pretraining corpus is small and in-domain.** Real BERT pretrains on
+  *billions* of words of diverse text; we pretrained on ~11M words of IMDB (the
+  same domain as the task), which injects little knowledge the labels can't teach.
+  Masked accuracy plateaued at ~0.24.
+
+So **four from-scratch levers — a transformer, subwords, pretrained word vectors,
+and self-supervised pretraining — all land at ~85–86%.** That is the honest
+result: the ceiling is the **task and the data/compute regime**, not any single
+component. Breaking it would take large-external-corpus pretraining at a scale
+beyond a laptop. Measuring and *explaining* all of this — with reproducible,
+controlled experiments — is the entire point of building the stack from scratch.
+
+> **Full metrics** — per-class precision/recall/F1 and confusion matrices for all
+> eight runs, plus the exact setup and reproduction commands, are in
+> [`BENCHMARKS.md`](BENCHMARKS.md).
 
 ---
 

@@ -10,9 +10,10 @@ This package defines the core tokenization abstractions:
   implements: `tokenize`, `encode`, `decode`, and access to its `vocabulary`.
 - `Vocabulary` (`vocabulary.py`) — an immutable, validated bidirectional
   mapping between tokens and integer ids. Optionally designates an unknown
-  token (`unk_token`) and a padding token (`pad_token`), exposing their ids as
-  `unk_id` / `pad_id`. `get_id` resolves unknown tokens to the unk id when one
-  is configured; `lookup_id` stays strict.
+  token (`unk_token`), a padding token (`pad_token`), and a mask token
+  (`mask_token`, for masked-language-model pretraining), exposing their ids as
+  `unk_id` / `pad_id` / `mask_id`. `get_id` resolves unknown tokens to the unk id
+  when one is configured; `lookup_id` stays strict.
 - `Encoding` (`encoding.py`) — the immutable output of a tokenizer, pairing
   token ids with their string tokens.
 
