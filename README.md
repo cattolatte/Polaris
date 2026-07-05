@@ -94,17 +94,17 @@ tokenizer below is implemented **from scratch** and trained through the same
 pipeline (data → tokenization → collation → model → training engine →
 evaluation). Runs are recorded and reproducible.
 
-| Model | Whitespace (20k) | BPE (10k) |
-| :--- | :---: | :---: |
-| Mean-pooling baseline | **0.856** | 0.839 |
-| Transformer encoder (from scratch) | 0.855 | 0.838 |
+| Model | Whitespace (20k) | BPE (10k) | GloVe (100d) |
+| :--- | :---: | :---: | :---: |
+| Mean-pooling baseline | 0.856 | 0.839 | **0.857** |
+| Transformer encoder (from scratch) | 0.855 | 0.838 | 0.849 |
 
 <sub>Test accuracy on IMDB · 25,000 train / 25,000 test · seed 0 · Apple Silicon
 (MPS). Reproduce with `examples/train_imdb_sentiment.py` (`TRAIN_SAMPLES =
-TEST_SAMPLES = 25000`, plus the `MODEL` / `TOKENIZER` switches).</sub>
+TEST_SAMPLES = 25000`, plus the `MODEL` / `TOKENIZER` / `GLOVE_PATH` switches).</sub>
 
-**What this shows** — two honest findings, each more interesting than a single
-number:
+**What this shows** — three honest findings, each more interesting than a single
+number. We pulled the three plausible levers, and **every one bounces off ~86%**:
 
 1. **The transformer does not beat the mean-pooling baseline** (they tie at
    ~85.5%). A small from-scratch transformer has no edge over a bag-of-embeddings
@@ -115,12 +115,18 @@ number:
    diluting the signal and lengthening sequences (so more of each review is lost
    to truncation). BPE pays off when the problem is out-of-vocabulary or
    morphology — not this one.
+3. **Pretrained *word* embeddings (GloVe) do not move it either** (+0.001 for the
+   pooling model; the transformer overfits *harder* and slips to 0.849).
+   Pretrained word vectors help most when labeled data is **scarce** — with
+   25,000 labeled reviews the model learns good embeddings from scratch anyway,
+   so GloVe's head start is redundant.
 
 The real ceiling (~85–86%) is the **model class**: simple, from-scratch models
-with **no pretraining** top out here. The lever that breaks it is pretrained
-representations — the reason modern NLP works — which is the next milestone.
-Measuring and explaining all of this is the point of building the whole stack
-from scratch.
+with **no contextual pretraining** top out here — tokenization and pretrained
+word vectors both bounce off it. The lever that actually breaks it is
+**self-supervised pretraining** (learn language from unlabeled text, then
+fine-tune) — the reason modern NLP works, and the next milestone. Measuring and
+explaining all of this is the point of building the whole stack from scratch.
 
 ---
 

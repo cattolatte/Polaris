@@ -8,7 +8,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
-Work toward **v0.10.0 — Pretrained Embeddings (GloVe)**. See `ROADMAP.md`.
+Work toward **v0.11.0 — Self-Supervised Pretraining (Masked Language Modeling)**.
+See `ROADMAP.md`.
+
+---
+
+## [v0.10.0] - 2026-07-05
+
+Pretrained Embeddings. A from-scratch GloVe loader and vocabulary-aligned
+embedding-matrix builder, wired into both models. The benchmark honestly shows
+GloVe does *not* break the ceiling on IMDB (+0.001 for the pooling model; the
+transformer overfits harder and slips to 0.849) — with 25,000 labeled reviews the
+model learns good embeddings from scratch anyway. Pretrained *word* vectors help
+when labeled data is scarce; the lever that actually moves this task is
+self-supervised (contextual) pretraining, which is the next milestone.
 
 ### Added
 
@@ -18,6 +31,7 @@ Work toward **v0.10.0 — Pretrained Embeddings (GloVe)**. See `ROADMAP.md`.
 ### Changed
 
 - The IMDB example has a `GLOVE_PATH` setting: point it at a GloVe file (with the whitespace tokenizer) to initialize the model's embeddings from pretrained vectors.
+- README benchmark table gains a GloVe column and the third honest finding (pretrained word embeddings do not break the ~86% ceiling here).
 
 ---
 

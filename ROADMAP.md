@@ -68,8 +68,8 @@ These rules apply to every component (see also `CONTRIBUTING.md` and `docs/adr/`
 
 | Item | Status |
 |------|--------------------------|
-| Current Version | `v0.9.0` |
-| Development Stage | Pretrained Embeddings (v0.10, upcoming) |
+| Current Version | `v0.10.0` |
+| Development Stage | Self-Supervised Pretraining (v0.11, in progress) |
 | Overall Progress | 🚧 Active Development |
 
 > **Roadmap revised 2026-07-03.** The future phases below were restructured from
@@ -350,14 +350,13 @@ honestly against the whitespace baseline.
 
 ## v0.10.0 — Pretrained Embeddings (GloVe)
 
-Status: 🚧 In Progress
+Status: ✅ Complete
 
 **Goal**
 
-Break the ~85–86% ceiling found in the v0.9 benchmark by initializing the
-embedding layer with **pretrained GloVe word vectors** instead of random ones —
-the one change that reliably lifts a simple model, and the reason pretraining
-transformed NLP.
+Test whether **pretrained GloVe word vectors** break the ~85–86% ceiling found in
+the v0.9 benchmark by initializing the embedding layer with them instead of random
+ones.
 
 **Major Components**
 
@@ -367,12 +366,48 @@ transformed NLP.
 
 **Outcome**
 
-Pretrained representations as the real accuracy lever, measured on Polaris' own
-from-scratch stack.
+Measured honestly: pretrained *word* embeddings do **not** break the ceiling on
+IMDB (+0.001 for pooling; the transformer overfits harder, 0.849). With 25k
+labeled reviews the model learns good embeddings from scratch anyway — pretrained
+word vectors pay off when labeled data is scarce. This isolates the real lever:
+self-supervised *contextual* pretraining (v0.11).
 
 ---
 
-## v0.11.0 — Deployment & CLI
+## v0.11.0 — Self-Supervised Pretraining (Masked Language Modeling)
+
+Status: 🚧 In Progress
+
+**Goal**
+
+Break the ceiling the honest way, entirely **from scratch**: pretrain Polaris' own
+transformer on **unlabeled** text with a masked-language-modeling objective, then
+fine-tune it on the labeled sentiment task. This is the recipe that actually
+transformed NLP (BERT) — implemented as our own code, on our own data, producing
+our own weights. Nothing is downloaded; "pretraining" here is a *training method*,
+not a borrowed model.
+
+**Major Components**
+
+- A `<mask>` special token and MLM collation: randomly mask ~15% of tokens
+  (BERT-style 80/10/10) and produce prediction targets for the masked positions
+- Extract the shared transformer **trunk** (embedding + positional + encoder
+  blocks → per-token hidden states) now that a *second* consumer (the MLM head)
+  proves the shape — the classifier and the MLM model both reuse it (ADR-0004)
+- A masked-language-model head + model, and a pretraining loop (cross-entropy on
+  masked positions only)
+- Transfer the pretrained trunk into the classifier and fine-tune
+- Pretrain on the **unlabeled IMDB split** (50k reviews), fine-tune on the 25k
+  labeled set, and benchmark against the from-scratch baseline
+
+**Outcome**
+
+The genuine accuracy lever — contextual pretraining — demonstrated on Polaris' own
+from-scratch stack, with the whole pretrain→fine-tune thread runnable end to end.
+
+---
+
+## v0.12.0 — Deployment & CLI
 
 Status: ⏳ Planned
 
