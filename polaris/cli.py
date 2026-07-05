@@ -65,6 +65,26 @@ def predict(
 
 
 @app.command()
+def console(
+    model: Annotated[
+        Path | None,
+        typer.Option(
+            "--model",
+            "-m",
+            exists=True,
+            dir_okay=False,
+            help="Optional bundle to load on startup.",
+        ),
+    ] = None,
+) -> None:
+    """Open the interactive Polaris console (load once, predict many)."""
+    # Imported lazily so `polaris info` works without the optional torch extra.
+    from polaris.console import run
+
+    run(str(model) if model is not None else None)
+
+
+@app.command()
 def serve(
     model: Annotated[
         Path,

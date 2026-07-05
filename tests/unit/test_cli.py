@@ -32,6 +32,7 @@ def test_no_arguments_shows_help() -> None:
     assert "info" in result.output
     assert "predict" in result.output
     assert "serve" in result.output
+    assert "console" in result.output
 
 
 def _write_bundle(path: Path) -> tuple[str, str]:

@@ -220,6 +220,17 @@ polaris predict "a wonderful, moving film" --model model.pt --probs
 #   pos: 0.9820
 ```
 
+**Or explore interactively** — the console loads the model once, then predicts
+instantly:
+
+```bash
+polaris console --model model.pt
+# ██████╗  ██████╗ ██╗      █████╗ ██████╗ ██╗███████╗   ...
+# polaris > predict a wonderful, moving film
+# pos
+# polaris > help
+```
+
 **Serve it over HTTP** (requires the `serving` extra — `uv sync --extra serving`):
 
 ```bash

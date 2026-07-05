@@ -12,6 +12,25 @@ Nothing yet.
 
 ---
 
+## [v1.1.0] - 2026-07-05
+
+The Interactive Console. `polaris console` opens a `msfconsole`-style REPL: a
+block-letter ASCII banner in a randomly chosen color scheme (bundled art +
+local randomness — no network, the Metasploit pattern), a `polaris >` prompt, and
+commands to load a saved model bundle **once** and predict on raw text many times —
+instant after the first load, unlike the one-shot `polaris predict`. Standard
+library only (`cmd` + raw ANSI); color respects `NO_COLOR` and non-TTY output.
+
+### Added
+
+- `polaris.console`: `PolarisConsole` (a `cmd.Cmd` REPL with `load`, `predict`,
+  `probs`, `info`, `exit`/`quit`, and built-in `help`), `render_banner` (bundled
+  block-letter art, five ANSI color schemes, seedable), and `run`.
+- `polaris console [--model BUNDLE]`: open the console, optionally pre-loading a
+  bundle.
+
+---
+
 ## [v1.0.1] - 2026-07-05
 
 **First PyPI release** — Polaris is now installable with `pip install polaris-nlp`
