@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ---
 
+## [Unreleased]
+
+Work toward **v0.10.0 — Pretrained Embeddings (GloVe)**. See `ROADMAP.md`.
+
+---
+
 ## [v0.9.0] - 2026-07-05
 
 Subword Tokenization. A from-scratch Byte Pair Encoding tokenizer (`train_bpe` +

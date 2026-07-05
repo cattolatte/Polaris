@@ -348,7 +348,31 @@ honestly against the whitespace baseline.
 
 ---
 
-## v0.10.0 — Deployment & CLI
+## v0.10.0 — Pretrained Embeddings (GloVe)
+
+Status: 🚧 In Progress
+
+**Goal**
+
+Break the ~85–86% ceiling found in the v0.9 benchmark by initializing the
+embedding layer with **pretrained GloVe word vectors** instead of random ones —
+the one change that reliably lifts a simple model, and the reason pretraining
+transformed NLP.
+
+**Major Components**
+
+- Load GloVe vectors and build an embedding matrix aligned to a `Vocabulary`
+- `pretrained_embeddings` support on the models (optionally frozen)
+- A GloVe-enabled example and a re-run benchmark
+
+**Outcome**
+
+Pretrained representations as the real accuracy lever, measured on Polaris' own
+from-scratch stack.
+
+---
+
+## v0.11.0 — Deployment & CLI
 
 Status: ⏳ Planned
 
