@@ -8,9 +8,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
-Work toward **v1.2.0 — Text Embedder & Contrastive Training**: a mean-pooled
-bi-encoder embedding model and the InfoNCE objective to train it. Additive and
-backward-compatible.
+Nothing yet.
+
+---
+
+## [v1.2.0] - 2026-07-14
+
+Text Embedder & Contrastive Training. A mean-pooled bi-encoder embedding model
+(`TextEmbedder`) and the InfoNCE objective to train it (in-batch and optional hard
+negatives). Additive and backward-compatible.
 
 ### Added
 
