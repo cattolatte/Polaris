@@ -8,8 +8,11 @@ from __future__ import annotations
 
 from polaris.collation.batch import Batch
 from polaris.collation.collator import collate
+from polaris.collation.contrastive import ContrastiveBatch, collate_contrastive
 
 __all__ = [
     "Batch",
+    "ContrastiveBatch",
     "collate",
+    "collate_contrastive",
 ]

@@ -12,6 +12,10 @@ the bridge between the tokenization layer and the model layer.
 - `collate` (`collator.py`) — group encoded samples into a padded `Batch`: pad each
   sequence to the batch's longest (or to `max_length`) with the vocabulary's pad id,
   and build the matching attention mask.
+- `ContrastiveBatch` / `collate_contrastive` (`contrastive.py`) — collate
+  `(anchor, positive)` or `(anchor, positive, hard_negatives)` pairs into aligned
+  batches for contrastive training (v1.2). Hard negatives are flattened to
+  `(B * num_negatives, T)` with the per-anchor count recorded. Reuses `collate`.
 
 ## Example
 

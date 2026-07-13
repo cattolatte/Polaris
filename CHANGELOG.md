@@ -8,7 +8,35 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
-Nothing yet.
+Work toward **v1.2.0 — Text Embedder & Contrastive Training**: a mean-pooled
+bi-encoder embedding model and the InfoNCE objective to train it. Additive and
+backward-compatible.
+
+### Added
+
+- `TextEmbedder` (`polaris.models`): a bi-encoder tower that emits a single
+  (optionally L2-normalized) embedding per text — the shared `TransformerEncoder`
+  trunk, mask-aware mean pooling, an optional linear projection, and optional
+  normalization. `forward(Batch)` and `encode(input_ids, attention_mask)`.
+- `mean_pool` (`polaris.models`): the mask-aware mean-pool, factored out of the two
+  classifiers (which now reuse it) so the embedder can share it.
+- `HasEncoder` (`polaris.models`): a structural protocol for models that wrap a
+  `TransformerEncoder` as `encoder`, used to type weight transfer.
+- `ContrastiveBatch` / `collate_contrastive` (`polaris.collation`): collate
+  `(anchor, positive)` or `(anchor, positive, hard_negatives)` pairs into aligned
+  batches (hard negatives flattened with a per-anchor count).
+- `info_nce_loss` (`polaris.training.losses`): InfoNCE contrastive loss with
+  in-batch negatives, optional per-anchor hard negatives, and an optional symmetric
+  (bidirectional) term.
+- `train_contrastive` (`polaris.training`): a minimal seeded driver that trains a
+  `TextEmbedder` with `info_nce_loss`.
+- The `build_model` factory now recognizes the `"embedder"` model type.
+
+### Changed
+
+- `MaskedLanguageModel.transfer_encoder_to` accepts any `HasEncoder` (the
+  classifier or the new `TextEmbedder`) rather than only the classifier — a widened
+  parameter, backward-compatible.
 
 ---
 
