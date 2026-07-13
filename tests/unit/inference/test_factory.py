@@ -5,7 +5,11 @@ from __future__ import annotations
 import pytest
 
 from polaris.inference.factory import UnknownModelTypeError, build_model
-from polaris.models import MeanPoolingClassifier, TransformerEncoderClassifier
+from polaris.models import (
+    MeanPoolingClassifier,
+    TextEmbedder,
+    TransformerEncoderClassifier,
+)
 
 # --- construction ---
 
@@ -33,6 +37,16 @@ def test_builds_transformer_model() -> None:
     )
 
     assert isinstance(model, TransformerEncoderClassifier)
+
+
+def test_builds_embedder_model() -> None:
+    """An ``"embedder"`` type builds a TextEmbedder from its config."""
+    model = build_model(
+        "embedder",
+        {"vocab_size": 10, "embed_dim": 8, "num_heads": 2, "num_layers": 1},
+    )
+
+    assert isinstance(model, TextEmbedder)
 
 
 # --- errors ---

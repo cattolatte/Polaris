@@ -25,8 +25,7 @@ from __future__ import annotations
 import torch
 from torch import nn
 
-from polaris.models.transformer_classifier import TransformerEncoderClassifier
-from polaris.models.transformer_encoder import TransformerEncoder
+from polaris.models.transformer_encoder import HasEncoder, TransformerEncoder
 from polaris.pretraining.masking import MaskedLMBatch
 
 __all__ = ["MaskedLanguageModel"]
@@ -97,17 +96,19 @@ class MaskedLanguageModel(nn.Module):
         logits: torch.Tensor = self.head(hidden)  # (B, S, V)
         return logits
 
-    def transfer_encoder_to(self, classifier: TransformerEncoderClassifier) -> None:
-        """Copy this model's pretrained trunk into a classifier, in place.
+    def transfer_encoder_to(self, target: HasEncoder) -> None:
+        """Copy this model's pretrained trunk into a downstream head, in place.
 
-        The classifier's own head is left untouched; only the shared ``encoder``
+        The target's own head is left untouched; only the shared ``encoder``
         weights are overwritten, so subsequent fine-tuning starts from the
-        pretrained representation.
+        pretrained representation. Works for any :class:`HasEncoder` — the
+        classifier, the :class:`~polaris.models.embedder.TextEmbedder`, or another
+        masked-language model.
 
         Parameters
         ----------
-        classifier : TransformerEncoderClassifier
-            The classifier whose ``encoder`` receives the pretrained weights. Its
-            trunk must have the same architecture as this model's.
+        target : HasEncoder
+            The model whose ``encoder`` receives the pretrained weights. Its trunk
+            must have the same architecture as this model's.
         """
-        classifier.encoder.load_state_dict(self.encoder.state_dict())
+        target.encoder.load_state_dict(self.encoder.state_dict())

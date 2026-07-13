@@ -22,12 +22,16 @@ from typing import Any
 from torch import nn
 
 from polaris.errors import PolarisError
-from polaris.models import MeanPoolingClassifier, TransformerEncoderClassifier
+from polaris.models import (
+    MeanPoolingClassifier,
+    TextEmbedder,
+    TransformerEncoderClassifier,
+)
 
 __all__ = ["MODEL_TYPES", "build_model"]
 
 # The model types a bundle may name, mapped to their concrete classes.
-MODEL_TYPES: tuple[str, ...] = ("pooling", "transformer")
+MODEL_TYPES: tuple[str, ...] = ("pooling", "transformer", "embedder")
 
 
 class UnknownModelTypeError(PolarisError):
@@ -40,7 +44,8 @@ def build_model(model_type: str, model_config: dict[str, Any]) -> nn.Module:
     Parameters
     ----------
     model_type : str
-        One of :data:`MODEL_TYPES` (``"pooling"`` or ``"transformer"``).
+        One of :data:`MODEL_TYPES` (``"pooling"``, ``"transformer"``, or
+        ``"embedder"``).
     model_config : dict
         The exact keyword arguments the model was originally built with.
 
@@ -68,6 +73,8 @@ def build_model(model_type: str, model_config: dict[str, Any]) -> nn.Module:
             return MeanPoolingClassifier(**model_config)
         case "transformer":
             return TransformerEncoderClassifier(**model_config)
+        case "embedder":
+            return TextEmbedder(**model_config)
         case _:
             msg = (
                 f"unknown model_type {model_type!r}; " f"expected one of {MODEL_TYPES}"

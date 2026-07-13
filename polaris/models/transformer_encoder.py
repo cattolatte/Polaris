@@ -23,6 +23,8 @@ Design Principles
 
 from __future__ import annotations
 
+from typing import Protocol, runtime_checkable
+
 import torch
 from torch import nn
 
@@ -32,7 +34,22 @@ from polaris.models.transformer import (
     TransformerEncoderBlock,
 )
 
-__all__ = ["TransformerEncoder"]
+__all__ = ["HasEncoder", "TransformerEncoder"]
+
+
+@runtime_checkable
+class HasEncoder(Protocol):
+    """A model that wraps a :class:`TransformerEncoder` trunk as ``encoder``.
+
+    The structural type shared by every head that composes the trunk — the
+    classifier, the masked-language model, and the :class:`TextEmbedder`. It
+    exists so a pretrained trunk can be transferred between any two of them by a
+    plain ``state_dict`` copy (see
+    :meth:`~polaris.pretraining.model.MaskedLanguageModel.transfer_encoder_to`),
+    without those heads needing a common base class.
+    """
+
+    encoder: TransformerEncoder
 
 
 class TransformerEncoder(nn.Module):

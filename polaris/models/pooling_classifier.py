@@ -21,6 +21,7 @@ import torch
 from torch import nn
 
 from polaris.collation.batch import Batch
+from polaris.models.pooling import mean_pool
 
 __all__ = ["MeanPoolingClassifier"]
 
@@ -75,12 +76,6 @@ class MeanPoolingClassifier(nn.Module):
             Logits of shape ``(batch_size, num_classes)``.
         """
         embedded: torch.Tensor = self.embedding(batch.input_ids)  # (B, S, E)
-
-        # Mask out padding, then average over the real tokens only.
-        mask = batch.attention_mask.unsqueeze(-1).to(embedded.dtype)  # (B, S, 1)
-        summed = (embedded * mask).sum(dim=1)  # (B, E)
-        token_counts = mask.sum(dim=1).clamp(min=1.0)  # (B, 1), avoid div-by-zero
-        pooled = summed / token_counts  # (B, E)
-
+        pooled = mean_pool(embedded, batch.attention_mask)  # (B, E)
         logits: torch.Tensor = self.classifier(pooled)  # (B, num_classes)
         return logits

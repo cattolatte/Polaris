@@ -18,6 +18,7 @@ import torch
 from torch import nn
 
 from polaris.collation.batch import Batch
+from polaris.models.pooling import mean_pool
 from polaris.models.transformer_encoder import TransformerEncoder
 
 __all__ = ["TransformerEncoderClassifier"]
@@ -93,12 +94,6 @@ class TransformerEncoderClassifier(nn.Module):
             Logits of shape ``(batch_size, num_classes)``.
         """
         hidden = self.encoder(batch.input_ids, batch.attention_mask)  # (B, S, E)
-
-        # Mask-aware mean pool over the real tokens.
-        mask_f = batch.attention_mask.unsqueeze(-1).to(hidden.dtype)
-        summed = (hidden * mask_f).sum(dim=1)
-        token_counts = mask_f.sum(dim=1).clamp(min=1.0)
-        pooled = summed / token_counts
-
+        pooled = mean_pool(hidden, batch.attention_mask)  # (B, E)
         logits: torch.Tensor = self.classifier(pooled)
         return logits
