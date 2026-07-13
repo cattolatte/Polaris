@@ -225,7 +225,6 @@ instantly:
 
 ```bash
 polaris console --model model.pt
-# ██████╗  ██████╗ ██╗      █████╗ ██████╗ ██╗███████╗   ...
 # polaris > predict a wonderful, moving film
 # pos
 # polaris > help
