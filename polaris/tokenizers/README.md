@@ -31,9 +31,12 @@ Concrete tokenizer implementations live alongside these abstractions:
 
 - `WhitespaceTokenizer` (`whitespace.py`) — the first reference implementation,
   splitting text on whitespace via `str.split`.
+- `BPETokenizer` (`bpe.py`) — the from-scratch subword tokenizer. Persists with
+  `save` / `load` (and `to_dict` / `from_dict`): a versioned JSON of the vocabulary,
+  merges, and end-of-word marker that reconstructs the tokenizer exactly.
 
-Additional strategies (Character, BPE, WordPiece, SentencePiece, Unigram) will
-be added incrementally, each satisfying the same `Tokenizer` contract.
+Additional strategies (Character, WordPiece, SentencePiece, Unigram) will be added
+incrementally, each satisfying the same `Tokenizer` contract.
 
 ## Example
 

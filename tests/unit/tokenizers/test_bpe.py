@@ -133,3 +133,33 @@ def test_train_bpe_reserves_pair_special_tokens_first() -> None:
         3,
         4,
     )
+
+
+def test_bpe_dict_round_trip_preserves_encoding() -> None:
+    """to_dict / from_dict reconstructs a tokenizer that encodes identically."""
+    tokenizer = train_bpe(
+        _corpus(), vocab_size=50, unk_token="<unk>", pad_token="<pad>"
+    )
+
+    restored = BPETokenizer.from_dict(tokenizer.to_dict())
+
+    text = "the cat sat"
+    assert restored.encode(text).ids == tokenizer.encode(text).ids
+    assert restored.decode(tokenizer.encode(text).ids) == tokenizer.decode(
+        tokenizer.encode(text).ids
+    )
+
+
+def test_bpe_save_load_round_trip(tmp_path) -> None:  # type: ignore[no-untyped-def]
+    """A saved tokenizer loads back and encodes/decodes identically."""
+    tokenizer = train_bpe(
+        _corpus(), vocab_size=50, unk_token="<unk>", pad_token="<pad>"
+    )
+    path = tmp_path / "tok.json"
+    tokenizer.save(path)
+
+    restored = BPETokenizer.load(path)
+
+    text = "the dog sat"
+    assert restored.encode(text).ids == tokenizer.encode(text).ids
+    assert restored.vocabulary == tokenizer.vocabulary

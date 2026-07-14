@@ -12,6 +12,22 @@ Nothing yet.
 
 ---
 
+## [v1.4.0] - 2026-07-14
+
+Quality-of-life: tokenizer persistence and a corpus-embedding helper. Additive and
+backward-compatible.
+
+### Added
+
+- `BPETokenizer.save` / `BPETokenizer.load` (and `to_dict` / `from_dict`):
+  serialize a trained BPE tokenizer (vocabulary + merges + end-of-word marker) to a
+  versioned JSON file and reconstruct it exactly, encoding/decoding identically.
+- `encode_texts` (`polaris.inference`): batch-embed a sequence of texts with a
+  `TextEmbedder`, returning a `(len(texts), embedding_dim)` NumPy array — the
+  corpus-embedding step of a dense retriever.
+
+---
+
 ## [v1.3.0] - 2026-07-14
 
 Sentence-Pair Cross-Encoder. A joint-encoding pair head (`SentencePairClassifier`,

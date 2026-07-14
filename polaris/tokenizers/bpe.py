@@ -19,8 +19,11 @@ Design Principles
 
 from __future__ import annotations
 
+import json
 from collections import Counter
-from collections.abc import Iterable, Sequence
+from collections.abc import Iterable, Mapping, Sequence
+from pathlib import Path
+from typing import Any
 
 from polaris.tokenizers.encoding import Encoding
 from polaris.tokenizers.vocabulary import Vocabulary
@@ -215,3 +218,73 @@ class BPETokenizer:
         """Reconstruct text from ids by joining subwords and restoring spaces."""
         tokens = [self._vocabulary.lookup_token(token_id) for token_id in ids]
         return "".join(tokens).replace(self._end_of_word, " ").strip()
+
+    def to_dict(self) -> dict[str, Any]:
+        """Serialize the tokenizer to a plain, JSON-able dictionary.
+
+        The inverse of :meth:`from_dict`. Captures everything needed to
+        reconstruct the tokenizer exactly: the vocabulary, the learned merges in
+        order, and the end-of-word marker.
+
+        Returns
+        -------
+        dict
+            A versioned dictionary with ``vocabulary``, ``merges``, and
+            ``end_of_word``.
+        """
+        return {
+            "version": 1,
+            "vocabulary": self._vocabulary.to_dict(),
+            "merges": [[left, right] for left, right in self._merges],
+            "end_of_word": self._end_of_word,
+        }
+
+    @classmethod
+    def from_dict(cls, data: Mapping[str, Any]) -> BPETokenizer:
+        """Reconstruct a ``BPETokenizer`` from :meth:`to_dict` output.
+
+        Parameters
+        ----------
+        data : Mapping
+            A mapping as produced by :meth:`to_dict`.
+
+        Returns
+        -------
+        BPETokenizer
+            The reconstructed tokenizer, encoding/decoding identically to the
+            original.
+        """
+        vocabulary = Vocabulary.from_dict(data["vocabulary"])
+        merges = [(left, right) for left, right in data["merges"]]
+        return cls(vocabulary, merges, end_of_word=data["end_of_word"])
+
+    def save(self, path: str | Path) -> None:
+        """Write the tokenizer to a JSON file (creating parent directories).
+
+        Parameters
+        ----------
+        path : str or Path
+            Destination file.
+        """
+        destination = Path(path)
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        destination.write_text(
+            json.dumps(self.to_dict(), ensure_ascii=False, indent=2), encoding="utf-8"
+        )
+
+    @classmethod
+    def load(cls, path: str | Path) -> BPETokenizer:
+        """Load a tokenizer previously written by :meth:`save`.
+
+        Parameters
+        ----------
+        path : str or Path
+            The JSON file to read.
+
+        Returns
+        -------
+        BPETokenizer
+            The reconstructed tokenizer.
+        """
+        data = json.loads(Path(path).read_text(encoding="utf-8"))
+        return cls.from_dict(data)

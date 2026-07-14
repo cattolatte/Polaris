@@ -26,6 +26,9 @@ training code can reload it and predict.
 - `build_model` (`factory.py`) — reconstruct a model from its saved type and
   config. A concrete `match` over the model types, **not** the dormant registry
   (ADR-0005): two types and one consumer do not justify a plugin lookup.
+- `encode_texts` (`embedding.py`) — batch-embed a sequence of texts with a
+  `TextEmbedder`, returning a `(len(texts), embedding_dim)` NumPy array (the
+  corpus-embedding step of a dense retriever).
 
 ## Example
 
