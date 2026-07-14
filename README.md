@@ -7,7 +7,8 @@
 *Build. Train. Evaluate. Deploy.*
 
 [![Status](https://img.shields.io/badge/status-stable-brightgreen)](https://github.com/cattolatte/Polaris/releases)
-[![Version](https://img.shields.io/badge/version-v1.0.0-blue)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-v1.2.0-blue)](CHANGELOG.md)
+[![PyPI](https://img.shields.io/badge/pip-polaris--nlp-blue)](https://pypi.org/project/polaris-nlp/)
 [![Python](https://img.shields.io/badge/python-3.12+-blue)](https://www.python.org)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
@@ -111,12 +112,15 @@ The platform is organized into dedicated modules with clearly defined responsibi
 | `data/` | Handles data loading and management, exposing datasets through a Polaris-native interface. | ✅ Implemented |
 | `tokenizers/` | A laboratory for building and using various tokenization strategies. | ✅ Implemented |
 | `collation/` | Turns tokenizer output into padded, model-ready tensor batches. | ✅ Implemented |
-| `models/` | From-scratch implementations of NLP architectures on PyTorch primitives. | ✅ Implemented |
-| `training/` | The training engine — training loops now; checkpointing and schedulers later. | ✅ Implemented |
-| `experiments/` | Manages experiment tracking, logging, and versioning of results. | 🏗️ Planned |
+| `models/` | From-scratch NLP architectures on PyTorch primitives: classifiers, the shared transformer trunk, and the `TextEmbedder` bi-encoder. | ✅ Implemented |
+| `pretraining/` | From-scratch masked-language-model pretraining and encoder weight transfer. | ✅ Implemented |
+| `training/` | Training engine: loops, `Trainer`, warmup schedules, checkpoints, and InfoNCE contrastive training. | ✅ Implemented |
+| `embeddings/` | Pretrained (GloVe) word-vector loading and alignment. | ✅ Implemented |
+| `experiments/` | Experiment tracking: config, environment capture, and recorded runs. | ✅ Implemented |
 | `evaluation/` | Tools and metrics for model evaluation. | ✅ Implemented |
-| `inference/` | Runtime for running predictions with trained models. | 🏗️ Planned |
-| `deployment/` | Contains utilities for packaging, optimizing, and deploying models for inference. | 🏗️ Planned |
+| `inference/` | Self-describing model bundles and a `Predictor` for running predictions. | ✅ Implemented |
+| `deployment/` | FastAPI HTTP serving over a trained model bundle. | ✅ Implemented |
+| `console/` | Interactive REPL (`polaris console`) for loading a model once and predicting. | ✅ Implemented |
 | `visualization/` | Tools for visualizing data, model architectures, and experiment results. | 🏗️ Planned |
 | `plugins/` | An extensible plugin system for integrating third-party tools and custom functionality. | 🏗️ Planned |
 | `utils/` | Common utilities (e.g. reproducible seeding) used across the framework. | ✅ Implemented |
