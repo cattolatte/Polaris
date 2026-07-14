@@ -8,8 +8,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
-Work toward **v1.3.0 — Sentence-Pair Cross-Encoder**: a joint-encoding pair head
-(`num_classes` for rerank/gate/NLI), pair collation, encoder segment support, and
+Nothing yet.
+
+---
+
+## [v1.3.0] - 2026-07-14
+
+Sentence-Pair Cross-Encoder. A joint-encoding pair head (`SentencePairClassifier`,
+`num_classes` for rerank/gate/NLI), pair collation, encoder segment support, and
 special-token reservation. Additive and backward-compatible.
 
 ### Added
