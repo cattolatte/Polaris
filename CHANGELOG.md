@@ -8,7 +8,28 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
-Nothing yet.
+Work toward **v1.3.0 — Sentence-Pair Cross-Encoder**: a joint-encoding pair head
+(`num_classes` for rerank/gate/NLI), pair collation, encoder segment support, and
+special-token reservation. Additive and backward-compatible.
+
+### Added
+
+- `SentencePairClassifier` (`polaris.models`): a cross-encoder that joint-encodes
+  `[CLS] a [SEP] b [SEP]`, pools (`"cls"` or `"mean"`), and scores with a linear
+  head — `num_classes=1` (ranking score), `2` (gate), `3` (NLI). Shares the trunk,
+  so it initializes from a pretrained MLM via `transfer_encoder_to`.
+- `PairBatch` / `collate_pairs` (`polaris.collation`): pack `(text_a, text_b, label)`
+  triples into `[CLS] a [SEP] b [SEP]` with segment ids and longest-first truncation.
+- `cls_token` / `sep_token` on `Vocabulary` (with `cls_id` / `sep_id`),
+  `build_vocabulary`, and `train_bpe` (which also gains `mask_token`) — reserved
+  first and contiguously so adding a special never renumbers corpus tokens.
+- The `build_model` factory now recognizes the `"pair_classifier"` model type.
+
+### Changed
+
+- `TransformerEncoder.forward` gains an optional `token_type_ids` argument; a
+  zero-initialized segment embedding is added only when it is given, so existing
+  single-segment call sites are byte-identical. Additive, backward-compatible.
 
 ---
 

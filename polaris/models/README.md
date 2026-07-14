@@ -24,6 +24,9 @@ pooled vector. They share the same trunk, so they are interchangeable heads.
   `mean_pool` + optional linear projection + optional L2-normalization, emitting a
   single embedding per text. `forward(Batch)` and `encode(input_ids, attention_mask)`.
   Train it with the InfoNCE objective (`polaris.training.losses`).
+- `SentencePairClassifier` (`pair_classifier.py`) — the cross-encoder (v1.3):
+  joint-encode `[CLS] a [SEP] b [SEP]`, pool (`"cls"`/`"mean"`), and score with a
+  linear head. `num_classes` selects rerank (1), gate (2), or NLI (3).
 - `mean_pool` (`pooling.py`) — the mask-aware mean over real tokens, shared by both
   classifiers and the embedder.
 - `HasEncoder` (`transformer_encoder.py`) — the structural type of "a model with a

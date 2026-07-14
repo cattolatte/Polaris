@@ -9,10 +9,13 @@ from __future__ import annotations
 from polaris.collation.batch import Batch
 from polaris.collation.collator import collate
 from polaris.collation.contrastive import ContrastiveBatch, collate_contrastive
+from polaris.collation.pairs import PairBatch, collate_pairs
 
 __all__ = [
     "Batch",
     "ContrastiveBatch",
+    "PairBatch",
     "collate",
     "collate_contrastive",
+    "collate_pairs",
 ]

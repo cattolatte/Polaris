@@ -7,6 +7,7 @@ import pytest
 from polaris.inference.factory import UnknownModelTypeError, build_model
 from polaris.models import (
     MeanPoolingClassifier,
+    SentencePairClassifier,
     TextEmbedder,
     TransformerEncoderClassifier,
 )
@@ -47,6 +48,16 @@ def test_builds_embedder_model() -> None:
     )
 
     assert isinstance(model, TextEmbedder)
+
+
+def test_builds_pair_classifier_model() -> None:
+    """A ``"pair_classifier"`` type builds a SentencePairClassifier."""
+    model = build_model(
+        "pair_classifier",
+        {"vocab_size": 10, "num_classes": 3, "embed_dim": 8, "num_heads": 2},
+    )
+
+    assert isinstance(model, SentencePairClassifier)
 
 
 # --- errors ---

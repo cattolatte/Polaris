@@ -16,6 +16,9 @@ the bridge between the tokenization layer and the model layer.
   `(anchor, positive)` or `(anchor, positive, hard_negatives)` pairs into aligned
   batches for contrastive training (v1.2). Hard negatives are flattened to
   `(B * num_negatives, T)` with the per-anchor count recorded. Reuses `collate`.
+- `PairBatch` / `collate_pairs` (`pairs.py`) — pack `(text_a, text_b, label)` into
+  `[CLS] a [SEP] b [SEP]` with segment (`token_type`) ids and longest-first
+  truncation, for the sentence-pair cross-encoder (v1.3).
 
 ## Example
 
