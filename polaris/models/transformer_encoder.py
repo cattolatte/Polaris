@@ -111,6 +111,12 @@ class TransformerEncoder(nn.Module):
         else:
             self.embedding = nn.Embedding(vocab_size, embed_dim, padding_idx=pad_id)
         self.embed_dim = embed_dim
+        # Optional segment (token-type) embeddings for sentence-pair inputs. Two
+        # segments (A/B). Zero-initialized so a trunk that never sees token type
+        # ids (or that was transferred from one) starts perfectly neutral, and so
+        # the addition is a no-op until fine-tuning learns it.
+        self.token_type_embedding = nn.Embedding(2, embed_dim)
+        nn.init.zeros_(self.token_type_embedding.weight)
         self.positional = SinusoidalPositionalEncoding(
             embed_dim=embed_dim, max_len=max_len
         )
@@ -129,7 +135,10 @@ class TransformerEncoder(nn.Module):
         self.norm = LayerNorm(embed_dim)
 
     def forward(
-        self, input_ids: torch.Tensor, attention_mask: torch.Tensor
+        self,
+        input_ids: torch.Tensor,
+        attention_mask: torch.Tensor,
+        token_type_ids: torch.Tensor | None = None,
     ) -> torch.Tensor:
         """Contextualize token ids into per-token hidden states.
 
@@ -140,6 +149,10 @@ class TransformerEncoder(nn.Module):
         attention_mask : torch.Tensor
             Long tensor of the same shape, ``1`` at real tokens and ``0`` at
             padding. Padding positions are excluded from attention.
+        token_type_ids : torch.Tensor, optional
+            Long tensor of the same shape with ``0`` for segment A and ``1`` for
+            segment B (sentence-pair inputs). When ``None`` (the default) no
+            segment embedding is added, so single-segment call sites are unchanged.
 
         Returns
         -------
@@ -147,6 +160,8 @@ class TransformerEncoder(nn.Module):
             Hidden states of shape ``(batch_size, seq_len, embed_dim)``.
         """
         hidden: torch.Tensor = self.embedding(input_ids)
+        if token_type_ids is not None:
+            hidden = hidden + self.token_type_embedding(token_type_ids)
         hidden = self.positional(hidden)
         hidden = self.dropout(hidden)
 

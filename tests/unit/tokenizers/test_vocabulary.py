@@ -435,3 +435,46 @@ def test_from_dict_defaults_missing_specials_to_none() -> None:
     assert restored.unk_token is None
     assert restored.pad_token is None
     assert restored.mask_token is None
+
+
+# ---------------------------------------------------------------------------
+# cls / sep special tokens (v1.3)
+# ---------------------------------------------------------------------------
+
+
+def test_cls_and_sep_derive_ids() -> None:
+    """Configured cls/sep tokens derive their ids like the other specials."""
+    vocab = Vocabulary(
+        {"<pad>": 0, "<cls>": 1, "<sep>": 2, "hi": 3},
+        pad_token="<pad>",
+        cls_token="<cls>",
+        sep_token="<sep>",
+    )
+    assert (vocab.cls_id, vocab.sep_id) == (1, 2)
+
+
+def test_cls_sep_default_to_none() -> None:
+    """Without cls/sep tokens, their ids are None."""
+    vocab = Vocabulary({"hi": 0})
+    assert vocab.cls_id is None and vocab.sep_id is None
+
+
+def test_special_tokens_include_cls_then_sep_last() -> None:
+    """special_tokens lists pad, unk, mask, cls, then sep."""
+    vocab = Vocabulary(
+        {"<pad>": 0, "<unk>": 1, "<mask>": 2, "<cls>": 3, "<sep>": 4},
+        pad_token="<pad>",
+        unk_token="<unk>",
+        mask_token="<mask>",
+        cls_token="<cls>",
+        sep_token="<sep>",
+    )
+    assert vocab.special_tokens == ("<pad>", "<unk>", "<mask>", "<cls>", "<sep>")
+
+
+def test_cls_sep_survive_dict_round_trip() -> None:
+    """to_dict / from_dict preserves cls/sep identities."""
+    vocab = Vocabulary(
+        {"<cls>": 0, "<sep>": 1, "hi": 2}, cls_token="<cls>", sep_token="<sep>"
+    )
+    assert Vocabulary.from_dict(vocab.to_dict()) == vocab

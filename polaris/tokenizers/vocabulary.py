@@ -56,6 +56,12 @@ class Vocabulary:
         pretraining. If given, it must be a key of ``token_to_id``.
         ``Vocabulary`` only records its identity; masking itself is performed by
         the pretraining layer.
+    cls_token : str, optional
+        The classification/start token prepended to a sentence pair (`[CLS]`). If
+        given, it must be a key of ``token_to_id``.
+    sep_token : str, optional
+        The separator token placed between and after the segments of a sentence
+        pair (`[SEP]`). If given, it must be a key of ``token_to_id``.
 
     Raises
     ------
@@ -91,11 +97,15 @@ class Vocabulary:
     unk_token: str | None = None
     pad_token: str | None = None
     mask_token: str | None = None
+    cls_token: str | None = None
+    sep_token: str | None = None
 
     id_to_token: Mapping[int, str] = field(init=False)
     unk_id: int | None = field(init=False)
     pad_id: int | None = field(init=False)
     mask_id: int | None = field(init=False)
+    cls_id: int | None = field(init=False)
+    sep_id: int | None = field(init=False)
 
     def __post_init__(self) -> None:
         """Validate invariants and derive the reverse mapping and special ids.
@@ -132,6 +142,8 @@ class Vocabulary:
             ("unk_token", self.unk_token),
             ("pad_token", self.pad_token),
             ("mask_token", self.mask_token),
+            ("cls_token", self.cls_token),
+            ("sep_token", self.sep_token),
         )
         for role, token in specials:
             if token is not None and token not in resolved_token_to_id:
@@ -167,6 +179,16 @@ class Vocabulary:
             "mask_id",
             None if self.mask_token is None else resolved_token_to_id[self.mask_token],
         )
+        object.__setattr__(
+            self,
+            "cls_id",
+            None if self.cls_token is None else resolved_token_to_id[self.cls_token],
+        )
+        object.__setattr__(
+            self,
+            "sep_id",
+            None if self.sep_token is None else resolved_token_to_id[self.sep_token],
+        )
 
     @property
     def size(self) -> int:
@@ -183,8 +205,9 @@ class Vocabulary:
     def special_tokens(self) -> tuple[str, ...]:
         """tuple[str, ...]: The configured special tokens, padding first.
 
-        Contains whichever of ``pad_token``, ``unk_token`` and ``mask_token``
-        are set, in that order. Empty when none is configured.
+        Contains whichever of ``pad_token``, ``unk_token``, ``mask_token``,
+        ``cls_token`` and ``sep_token`` are set, in that order. Empty when none is
+        configured.
 
         Examples
         --------
@@ -196,7 +219,13 @@ class Vocabulary:
         """
         return tuple(
             token
-            for token in (self.pad_token, self.unk_token, self.mask_token)
+            for token in (
+                self.pad_token,
+                self.unk_token,
+                self.mask_token,
+                self.cls_token,
+                self.sep_token,
+            )
             if token is not None
         )
 
@@ -224,6 +253,8 @@ class Vocabulary:
             "unk_token": self.unk_token,
             "pad_token": self.pad_token,
             "mask_token": self.mask_token,
+            "cls_token": self.cls_token,
+            "sep_token": self.sep_token,
         }
 
     @classmethod
@@ -245,6 +276,8 @@ class Vocabulary:
             unk_token=data.get("unk_token"),
             pad_token=data.get("pad_token"),
             mask_token=data.get("mask_token"),
+            cls_token=data.get("cls_token"),
+            sep_token=data.get("sep_token"),
         )
 
     def lookup_id(self, token: str) -> int:

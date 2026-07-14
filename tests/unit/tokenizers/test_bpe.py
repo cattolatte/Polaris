@@ -112,3 +112,24 @@ def test_encode_aligns_ids_and_tokens() -> None:
     encoding = tokenizer.encode("newer")
 
     assert len(encoding.ids) == len(encoding.tokens)
+
+
+def test_train_bpe_reserves_pair_special_tokens_first() -> None:
+    """cls/sep/mask are reserved contiguously before any learned symbols."""
+    tokenizer = train_bpe(
+        [["good", "movie"], ["good", "film"]],
+        vocab_size=50,
+        pad_token="<pad>",
+        unk_token="<unk>",
+        mask_token="<mask>",
+        cls_token="<cls>",
+        sep_token="<sep>",
+    )
+    vocab = tokenizer.vocabulary
+    assert (vocab.pad_id, vocab.unk_id, vocab.mask_id, vocab.cls_id, vocab.sep_id) == (
+        0,
+        1,
+        2,
+        3,
+        4,
+    )

@@ -187,3 +187,28 @@ def test_builder_reserves_mask_token() -> None:
     assert vocabulary.unk_id == 1
     assert vocabulary.mask_id == 2
     assert vocabulary.lookup_id("good") == 3
+
+
+# ---------------------------------------------------------------------------
+# cls / sep reservation (v1.3)
+# ---------------------------------------------------------------------------
+
+
+def test_reserves_cls_and_sep_first_contiguously() -> None:
+    """All specials get the low, contiguous ids; corpus tokens follow."""
+    vocab = build_vocabulary(
+        [["good", "movie"]],
+        pad_token="<pad>",
+        unk_token="<unk>",
+        mask_token="<mask>",
+        cls_token="<cls>",
+        sep_token="<sep>",
+    )
+    assert (vocab.pad_id, vocab.unk_id, vocab.mask_id, vocab.cls_id, vocab.sep_id) == (
+        0,
+        1,
+        2,
+        3,
+        4,
+    )
+    assert vocab.lookup_id("good") >= 5

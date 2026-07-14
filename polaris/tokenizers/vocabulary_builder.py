@@ -29,14 +29,17 @@ def build_vocabulary(
     unk_token: str | None = None,
     pad_token: str | None = None,
     mask_token: str | None = None,
+    cls_token: str | None = None,
+    sep_token: str | None = None,
     min_frequency: int = 1,
     max_size: int | None = None,
 ) -> Vocabulary:
     """Build a ``Vocabulary`` from tokenized text.
 
-    Special tokens are reserved first (padding, then unknown, then mask),
-    followed by corpus tokens ordered by descending frequency, with ties broken
-    alphabetically for determinism. Ids are assigned contiguously from ``0``.
+    Special tokens are reserved first (padding, unknown, mask, cls, then sep),
+    contiguously, so adding a special never renumbers the corpus tokens. Corpus
+    tokens follow, ordered by descending frequency with ties broken alphabetically
+    for determinism. Ids are assigned contiguously from ``0``.
 
     Parameters
     ----------
@@ -52,6 +55,12 @@ def build_vocabulary(
     mask_token : str, optional
         If given, reserved as the masked-language-model mask token and passed
         through to the resulting ``Vocabulary``.
+    cls_token : str, optional
+        If given, reserved as the classification/start token (`[CLS]`) for
+        sentence-pair models and passed through to the resulting ``Vocabulary``.
+    sep_token : str, optional
+        If given, reserved as the segment separator (`[SEP]`) for sentence-pair
+        models and passed through to the resulting ``Vocabulary``.
     min_frequency : int, default 1
         Corpus tokens appearing fewer than this many times are dropped. Must
         be at least ``1``.
@@ -87,7 +96,7 @@ def build_vocabulary(
         raise ValueError(msg)
 
     specials: list[str] = []
-    for token in (pad_token, unk_token, mask_token):
+    for token in (pad_token, unk_token, mask_token, cls_token, sep_token):
         if token is not None and token not in specials:
             specials.append(token)
 
@@ -127,4 +136,6 @@ def build_vocabulary(
         unk_token=unk_token,
         pad_token=pad_token,
         mask_token=mask_token,
+        cls_token=cls_token,
+        sep_token=sep_token,
     )

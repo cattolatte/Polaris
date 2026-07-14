@@ -52,6 +52,9 @@ def train_bpe(
     vocab_size: int,
     unk_token: str | None = None,
     pad_token: str | None = None,
+    mask_token: str | None = None,
+    cls_token: str | None = None,
+    sep_token: str | None = None,
     end_of_word: str = "</w>",
     min_frequency: int = 1,
 ) -> BPETokenizer:
@@ -69,8 +72,10 @@ def train_bpe(
     vocab_size : int
         Target vocabulary size (special tokens and base characters count toward
         it; it bounds how many merges are learned).
-    unk_token, pad_token : str, optional
-        Special tokens, reserved first and passed to the resulting vocabulary.
+    unk_token, pad_token, mask_token, cls_token, sep_token : str, optional
+        Special tokens, reserved first and contiguously (in that order) and passed
+        to the resulting vocabulary, so adding one never renumbers other symbols.
+        ``mask_token`` is for MLM; ``cls_token`` / ``sep_token`` for pair models.
     end_of_word : str, default "</w>"
         Marker appended to each word so word boundaries survive tokenization.
     min_frequency : int, default 1
@@ -90,7 +95,10 @@ def train_bpe(
     for sequence in token_sequences:
         word_frequencies.update(sequence)
 
-    specials = [token for token in (pad_token, unk_token) if token is not None]
+    specials: list[str] = []
+    for token in (pad_token, unk_token, mask_token, cls_token, sep_token):
+        if token is not None and token not in specials:
+            specials.append(token)
 
     # Character coverage comes from every word; merges are learned only from
     # words meeting `min_frequency`.
@@ -135,6 +143,9 @@ def train_bpe(
         token_to_id={token: index for index, token in enumerate(ordered)},
         unk_token=unk_token,
         pad_token=pad_token,
+        mask_token=mask_token,
+        cls_token=cls_token,
+        sep_token=sep_token,
     )
     return BPETokenizer(vocabulary, merges, end_of_word=end_of_word)
 
