@@ -7,7 +7,7 @@
 *Build. Train. Evaluate. Deploy.*
 
 [![Status](https://img.shields.io/badge/status-stable-brightgreen)](https://github.com/cattolatte/Polaris/releases)
-[![Version](https://img.shields.io/badge/version-v1.2.0-blue)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-v1.4.0-blue)](CHANGELOG.md)
 [![PyPI](https://img.shields.io/badge/pip-polaris--nlp-blue)](https://pypi.org/project/polaris-nlp/)
 [![Python](https://img.shields.io/badge/python-3.12+-blue)](https://www.python.org)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
